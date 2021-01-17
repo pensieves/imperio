@@ -11,22 +11,11 @@ except ImportError:
 import pyaudio
 from six.moves import queue
 
-import re
-import string
-
-import rospy
-from hr_msgs.msg import TTS
+from TextStreamPublisher import LANGUAGE, TextStreamPublisher
 
 # Audio recording parameters
 SAMPLE_RATE = 16000
 CHUNK = int(SAMPLE_RATE / 10)  # 100ms
-
-LANGUAGE = "en-US" # a BCP-47 language tag
-# LANGUAGE = "en-IN"
-
-CONTEXT_PHRASES = ["Asha", "Hey Asha", "Hey, Asha", "Hi Asha", "Hi, Asha", 
-                    "Okay Asha", "Okay, Asha"]
-ACTION_PHRASES = ["emergency stop"]
 
 class AudioStreamer(object):
     """Opens a recording stream as a generator yielding the audio chunks."""
@@ -98,19 +87,21 @@ class AudioStreamer(object):
 class SpeechRecognizer(object):
 
     def __init__(self, rate=SAMPLE_RATE, chunk=CHUNK, lang=LANGUAGE, 
-                context_phrases=CONTEXT_PHRASES, action_phrases=ACTION_PHRASES):
+                text_streamer=None, text_stream_publisher=None):
         
         self._rate = rate
         self._chunk = chunk
 
         self._lang = lang
-        self._context_phrases = context_phrases
-        self._action_phrases = action_phrases
-        self._phrases = context_phrases + action_phrases
         self._punctuation = True
+        self._text_streamer = text_streamer
 
-        speech_topic = rospy.get_param('speech_topic', '/hr/control/speech/say')
-        self.pub = rospy.Publisher(speech_topic, TTS, queue_size=10)
+        self._text_stream_publisher = text_stream_publisher
+        if text_stream_publisher is None:
+            self._text_stream_publisher = TextStreamPublisher()
+
+        self._phrases = (self._text_stream_publisher.context_phrases + 
+                        self._text_stream_publisher.action_phrases)
 
     def _get_speech_client_and_config(self):
         client = speech.SpeechClient()
@@ -149,7 +140,7 @@ class SpeechRecognizer(object):
     def transcribe(self):
         client, streaming_config = self._get_speech_client_and_config()
 
-        with AudioStreamer(self._rate, self._chunk) as streamer:
+        with AudioStreamer(self._rate, self._chunk) as audio_streamer:
 
             try:
                 StreamingRecognizeRequest = speech.StreamingRecognizeRequest
@@ -158,7 +149,7 @@ class SpeechRecognizer(object):
                 StreamingRecognizeRequest = types.StreamingRecognizeRequest
 
             requests = (StreamingRecognizeRequest(audio_content=content)
-                for content in streamer.stream()
+                for content in audio_streamer.stream()
             )
             
             responses = client.streaming_recognize(streaming_config, requests)
@@ -168,53 +159,21 @@ class SpeechRecognizer(object):
 
     def _handle_responses(self, responses):
         for response in responses:
-            if not response.results:
-                continue
+            if response.results and (len(response.results) > 1 or response.results[0].is_final):
 
-            text = []
-            confidences = []
+                result = response.results[0]
+                if result.alternatives:
+                    text = result.alternatives[0].transcript
+                    confidence = int(100*result.alternatives[0].confidence)
 
-            for result in response.results:
-
-                if result.is_final:
+                    stream = None
+                    if self._text_streamer:
+                        stream = self._text_streamer.text_to_stream(text, reset=result.is_final)
+                    elif result.is_final:
+                        stream = [text]
                     
-                    for alt in result.alternatives:
-                        text.append(alt.transcript)
-                        confidences.append(alt.confidence)
-            
-            confidence = 0
-            if confidences:
-                confidence = sum(confidences) / len(confidences)
-                confidence = int(100 * confidence)
+                    if stream:
+                        self._text_stream_publisher.publish(stream, reset=result.is_final)
 
-            text = ' '.join(text).strip()
-
-            if text:
-                context_regex = '|'.join(self._context_phrases)
-                context_regex = "^({})[{}]?".format(context_regex, string.punctuation)
-                context_phrase = re.search(context_regex, text)
-                context_phrase = context_phrase.group(0) if context_phrase else ""
-
-                if context_phrase:
-                    text = text[len(context_phrase):].strip()
-                    text = "Context phrase, {}, is recognized."\
-                            " Intended action for, {}, will be executed."\
-                            .format(context_phrase, text)
-                    print(text)
-                    self.pub.publish(text=text, lang=self._lang)
-
-                else:
-                    print('Recognised "{}" in "{}"'.format(text, self._lang))
-                    self.pub.publish(text=text, lang="hi-IN")
-                        # , request_id=None, agent_id=None)
-
-if __name__ == "__main__":
-    rospy.init_node("speech_recognizer")
-
-    while True:
-        try:
-            SpeechRecognizer().transcribe()
-        except Exception as exception:
-            print(exception)
-    
-    # rospy.spin()
+                    if result.is_final:
+                        print("--Final--\n", text, "\n---\n")
