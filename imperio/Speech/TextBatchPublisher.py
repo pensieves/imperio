@@ -39,7 +39,7 @@ def set_actuator_control(actuator_control_service, actuator_names, control_type=
     control_request.actuators = actuator_names
     actuator_control_service(control_request)
 
-class TextStreamPublisher(object):
+class TextBatchPublisher(object):
     def __init__(self, lang=LANGUAGE, context_phrases=CONTEXT_PHRASES, 
                 action_phrases=ACTION_PHRASES, action_map=ACTION_MAP):
         self._lang = lang
@@ -70,31 +70,31 @@ class TextStreamPublisher(object):
         self._context_phrase = ""
         self._processing_context = False
 
-    def publish(self, stream, reset=False):
+    def publish(self, batch, reset=False):
         
         set_actuator_control(self._set_control, self._actuator_names)
 
-        if stream:
-            context_phrase = re.search(self._context_regex, stream[0])
+        if batch:
+            context_phrase = re.search(self._context_regex, batch[0])
 
             if context_phrase or self._processing_context:
-                self._handle_context_phrase(context_phrase, stream, reset=reset)
+                self._handle_context_phrase(context_phrase, batch, reset=reset)
 
             else:
-                for text in stream:
+                for text in batch:
                     print('Recognised "{}" in "{}"\n'.format(text, self._lang))
                     self._speech_pub.publish(text=text, lang=self._lang)
                                     # , request_id=None, agent_id=None)
 
-    def _handle_context_phrase(self, context_phrase, stream, reset=False):
+    def _handle_context_phrase(self, context_phrase, batch, reset=False):
         context_phrase = context_phrase.group(0) if context_phrase else ""
 
         if not self._processing_context:
-            stream[0] = stream[0][len(context_phrase):].strip()
+            batch[0] = batch[0][len(context_phrase):].strip()
             self._processing_context = True
             self._context_phrase = context_phrase
 
-        self._action_text += (" " + " ".join(stream))
+        self._action_text += (" " + " ".join(batch))
 
         if reset:
             text = "Context phrase, {}, is recognized. Intended action for, {}, will be executed."\
