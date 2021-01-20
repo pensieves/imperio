@@ -3,7 +3,7 @@ import string
 
 import rospy
 import genpy
-from hr_msgs.msg import TTS, SetExpression
+from hr_msgs.msg import TTS, SetExpression, SetAnimation
 from hr_msgs.srv import SetActuatorsControl, SetActuatorsControlRequest
 
 from actuator_names import HEAD_ACTUATOR_NAMES
@@ -13,17 +13,26 @@ LANGUAGE = "en-US" # a BCP-47 language tag
 
 CONTEXT_PHRASES = ["Asha", "Hey Asha", "Hey, Asha", "Hi Asha", "Hi, Asha", 
                     "Okay Asha", "Okay, Asha"]
+
 ACTION_PHRASES = ["emergency stop"]
+ACTION_MAP = dict() # empty dict for now. Action sequences to be coded.
 
-expression_args = {"magnitude": 1, "duration":genpy.Duration(2)}
-expression_names = {"happy", "sad", "worry", "amused", "angry", "fear", 
-                    "surprised", "confused", "engaged", "comprehending"}
+expression_args = dict(magnitude=1, duration=genpy.Duration(2))
+EXPRESSION_PHRASES = ["happy", "sad", "worry", "amused", "angry", "fear", 
+                    "surprised", "confused", "engaged", "comprehending"]
+expression_name_map = dict()
+EXPRESSION_MAP = {name: SetExpression(name=expression_name_map.get(name, name), 
+                                        **expression_args) for name in EXPRESSION_PHRASES}
 
-ACTION_MAP = {name: SetExpression(name=name, **expression_args) for name in expression_names}
-ACTION_PHRASES += list(expression_names)
+animation_args = dict(magnitude=1, speed=1)
+animation_name_map = dict(nod="nod_1", blink="eyes_Blink", denied="deny_Confident")# "shakeDeny_NeverHeardBefore")
+ANIMATION_PHRASES = list(animation_name_map.keys())
+ANIMATION_MAP = {animation_name: SetAnimation(name=animation, **animation_args)
+                    for animation_name, animation in animation_name_map.items()}
 
 TOPIC_MAP = {"SPEECH_TOPIC": "/hr/control/speech/say",
             "SET_EXPRESSION": "/hr/animation/set_expression",
+            "SET_ANIMATION": "/hr/animation/available_animations",
             "CONTROL_ACTUATOR": "/hr/actuators/set_control"}
 
 def set_actuator_control(actuator_control_service, actuator_names, control_type="CONTROL_ANIMATION"):
@@ -41,17 +50,29 @@ def set_actuator_control(actuator_control_service, actuator_names, control_type=
 
 class TextBatchPublisher(object):
     def __init__(self, lang=LANGUAGE, context_phrases=CONTEXT_PHRASES, 
-                action_phrases=ACTION_PHRASES, action_map=ACTION_MAP):
+                action_phrases=ACTION_PHRASES, action_map=ACTION_MAP, 
+                expression_phrases=EXPRESSION_PHRASES, expression_map=EXPRESSION_MAP,
+                animation_phrases=ANIMATION_PHRASES, animation_map=ANIMATION_MAP):
+
         self._lang = lang
         self.context_phrases = context_phrases
+
         self.action_phrases = action_phrases
         self._action_map = action_map
+
+        self.expression_phrases = expression_phrases
+        self._expression_map = expression_map
+
+        self.animation_phrases = animation_phrases
+        self._animation_map = animation_map
 
         self._context_regex = '|'.join(self.context_phrases)
         self._context_regex = "^\s+?({})[{}]?".format(self._context_regex, string.punctuation)
 
-        self._action_regex = "({})".format("|".join(self.action_phrases))
-        
+        self._action_regex = "({})".format("|".join(self.action_phrases + 
+                                                    self.expression_phrases + 
+                                                    self.animation_phrases))
+
         self._action_text = ""
         self._context_phrase = ""
         self._processing_context = False
@@ -64,6 +85,9 @@ class TextBatchPublisher(object):
 
         self._express_pub = rospy.Publisher(TOPIC_MAP["SET_EXPRESSION"], 
                                             SetExpression, queue_size=10)
+
+        self._animation_pub = rospy.Publisher(TOPIC_MAP["SET_ANIMATION"], 
+                                                SetAnimation, queue_size=10)
 
     def reset(self):
         self._action_text = ""
@@ -83,7 +107,7 @@ class TextBatchPublisher(object):
             else:
                 for text in batch:
                     print('Recognised "{}" in "{}"\n'.format(text, self._lang))
-                    self._speech_pub.publish(text=text, lang=self._lang)
+                    self._speech_pub.publish(text=text, lang="en-US")#self._lang)
                                     # , request_id=None, agent_id=None)
 
     def _handle_context_phrase(self, context_phrase, batch, reset=False):
@@ -101,14 +125,24 @@ class TextBatchPublisher(object):
                     .format(self._context_phrase, self._action_text)
             print(text)
 
-            action_name = re.search(self._action_regex, self._action_text.lower())
-            action_name = action_name.group(0) if action_name else ""
-            action_msg = self._action_map.get(action_name)
+            action_names = re.findall(self._action_regex, self._action_text.lower())
 
-            if action_msg:
-                print("Performing action = {}".format(action_name))
-                self._express_pub.publish(action_msg)
-            else:
-                print("No action can be performed. Action phrase consists of unknown action.")
+            published_at_least_once = False
+            type_msg_pub_dict = {"action": (self._action_map, None), "expression": (self._expression_map, self._express_pub), 
+                                "animation": (self._animation_map, self._animation_pub)}
+            
+            if action_names:
+                for name in action_names:
+                    for action_type, (msg_map, pub) in type_msg_pub_dict.items():
+
+                        msg = msg_map.get(name)
+
+                        if msg:
+                            print("Performing {} = {}".format(action_type, name))
+                            pub.publish(msg)
+                            published_at_least_once = True
+
+            if not published_at_least_once:
+                print("No action performed. Action phrase consists of unknown action.")
 
             self.reset()
