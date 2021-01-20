@@ -8,8 +8,8 @@ from hr_msgs.srv import SetActuatorsControl, SetActuatorsControlRequest
 
 from actuator_names import HEAD_ACTUATOR_NAMES
 
-LANGUAGE = "en-US" # a BCP-47 language tag
-# LANGUAGE = "en-IN"
+# LANGUAGE = "en-US" # a BCP-47 language tag
+LANGUAGE = "en-IN"
 
 CONTEXT_PHRASES = ["Asha", "Hey Asha", "Hey, Asha", "Hi Asha", "Hi, Asha", 
                     "Okay Asha", "Okay, Asha"]
@@ -25,14 +25,15 @@ EXPRESSION_MAP = {name: SetExpression(name=expression_name_map.get(name, name),
                                         **expression_args) for name in EXPRESSION_PHRASES}
 
 animation_args = dict(magnitude=1, speed=1)
-animation_name_map = dict(nod="nod_1", blink="eyes_Blink", denied="deny_Confident")# "shakeDeny_NeverHeardBefore")
+# animation_name_map = dict(nod="head_DownShort", blink="eyes_Blink")
+animation_name_map = dict(nod="happy_Smiley01", blink="eyes_Blink")
 ANIMATION_PHRASES = list(animation_name_map.keys())
 ANIMATION_MAP = {animation_name: SetAnimation(name=animation, **animation_args)
                     for animation_name, animation in animation_name_map.items()}
 
 TOPIC_MAP = {"SPEECH_TOPIC": "/hr/control/speech/say",
             "SET_EXPRESSION": "/hr/animation/set_expression",
-            "SET_ANIMATION": "/hr/animation/available_animations",
+            "SET_ANIMATION": "/hr/animation/set_animation",
             "CONTROL_ACTUATOR": "/hr/actuators/set_control"}
 
 def set_actuator_control(actuator_control_service, actuator_names, control_type="CONTROL_ANIMATION"):
@@ -67,7 +68,7 @@ class TextBatchPublisher(object):
         self._animation_map = animation_map
 
         self._context_regex = '|'.join(self.context_phrases)
-        self._context_regex = "^\s+?({})[{}]?".format(self._context_regex, string.punctuation)
+        self._context_regex = "^(\s+)?({})[{}]?".format(self._context_regex, string.punctuation)
 
         self._action_regex = "({})".format("|".join(self.action_phrases + 
                                                     self.expression_phrases + 
@@ -139,6 +140,7 @@ class TextBatchPublisher(object):
 
                         if msg:
                             print("Performing {} = {}".format(action_type, name))
+
                             pub.publish(msg)
                             published_at_least_once = True
 
