@@ -101,7 +101,9 @@ class SpeechRecognizer(object):
             self._text_batch_publisher = TextBatchPublisher()
 
         self._phrases = (self._text_batch_publisher.context_phrases + 
-                        self._text_batch_publisher.action_phrases)
+                        self._text_batch_publisher.action_phrases + 
+                        self._text_batch_publisher.expression_phrases + 
+                        self._text_batch_publisher.animation_phrases)
 
     def _get_speech_client_and_config(self):
         client = speech.SpeechClient()
@@ -109,7 +111,8 @@ class SpeechRecognizer(object):
         recognition_config = dict(sample_rate_hertz=self._rate,
             language_code=self._lang,
             max_alternatives=1,
-            enable_automatic_punctuation=self._punctuation
+            enable_automatic_punctuation=self._punctuation,
+            use_enhanced=True
         )
 
         try:
