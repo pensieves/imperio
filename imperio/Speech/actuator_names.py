@@ -1,73 +1,12 @@
+import pandas as pd
 import re
 
-ACTUATOR_NAMES = ["BrowOuterLeft",
-					"BrowInnerLeft",
-					"BrowCenter",
-					"BrowInnerRight",
-					"UpperLidLeft",
-					"BrowOuterRight",
-					"UpperLidRight",
-					"LowerLidLeft",
-					"LowerLidRight",
-					"EyeTurnLeft",
-					"EyeTurnRight",
-					"EyesUpDown",
-					"CheekSquintLeft",
-					"CheekSquintRight",
-					"UpperLipLeft",
-					"UpperLipCenter",
-					"UpperLipRight",
-					"LowerLipLeft",
-					"LowerLipCenter",
-					"LowerLipRight",
-					"LipsStretchLeft",
-					"FrownLeft",
-					"FrownRight",
-					"SmileLeft",
-					"SmileRight",
-					"Jaw",
-					"Tongue",
-					"UpperGimbalLeft",
-					"UpperGimbalRight",
-					"LowerGimbalLeft",
-					"LowerGimbalRight",
-					"NeckRotation",
-					"RightShoulderPitch",
-					"RightShoulderRoll",
-					"RightShoulderYaw",
-					"RightElbowPitch",
-					"RightElbowYaw",
-					"RightWristPitch",
-					"RightWristRoll",
-					"RightThumbRoll",
-					"RightThumbFinger",
-					"RightFingerSpread",
-					"RightIndexFinger",
-					"RightMiddleFinger",
-					"RightRingFinger",
-					"RightPinkyFinger",
-					"LeftShoulderPitch",
-					"LeftShoulderRoll",
-					"LeftShoulderYaw",
-					"LeftElbowPitch",
-					"LeftElbowYaw",
-					"LeftWristPitch",
-					"LeftWristRoll",
-					"LeftThumbRoll",
-					"LeftThumbFinger",
-					"LeftFingerSpread",
-					"LeftIndexFinger",
-					"LeftMiddleFinger",
-					"LeftRingFinger",
-					"LeftPinkyFinger",
-					"Base"]
+actuator_names_file = "actuator_names.txt"
+ACTUATOR_NAMES = pd.read_csv(actuator_names_file, header=None).iloc[:,0]
 
 head_actuator_keywords = ["Brow", "Lid", "Eye", "Cheek", "Lip", "Frown", "Smile",
 							"Jaw", "Tongue", "Gimbal", "Neck"]
 
 head_actuator_regex = "({})".format("|".join(head_actuator_keywords))
-HEAD_ACTUATOR_NAMES = []
-
-for actuator_name in ACTUATOR_NAMES:
-	if re.search(head_actuator_regex, actuator_name):
-		HEAD_ACTUATOR_NAMES.append(actuator_name)
+head_actuators = ACTUATOR_NAMES.str.contains(head_actuator_regex, regex=True, na=False)
+HEAD_ACTUATOR_NAMES = ACTUATOR_NAMES.loc[head_actuators]

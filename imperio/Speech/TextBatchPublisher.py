@@ -26,7 +26,8 @@ EXPRESSION_MAP = {name: SetExpression(name=expression_name_map.get(name, name),
 
 animation_args = dict(magnitude=1, speed=1)
 # animation_name_map = dict(nod="head_DownShort", blink="eyes_Blink")
-animation_name_map = dict(nod="happy_Smiley01", blink="eyes_Blink")
+animation_name_map = dict(laugh="happy_LaughterBack", wink="wink_1", 
+                            nod="happy_Smiley01", blink="eyes_Blink")
 ANIMATION_PHRASES = list(animation_name_map.keys())
 ANIMATION_MAP = {animation_name: SetAnimation(name=animation, **animation_args)
                     for animation_name, animation in animation_name_map.items()}
@@ -82,7 +83,7 @@ class TextBatchPublisher(object):
         self._speech_pub = rospy.Publisher(speech_topic, TTS, queue_size=10)
 
         self._set_control = rospy.ServiceProxy(TOPIC_MAP["CONTROL_ACTUATOR"], SetActuatorsControl)
-        self._actuator_names = HEAD_ACTUATOR_NAMES
+        self._actuator_names = HEAD_ACTUATOR_NAMES.tolist()
 
         self._express_pub = rospy.Publisher(TOPIC_MAP["SET_EXPRESSION"], 
                                             SetExpression, queue_size=10)
@@ -96,7 +97,6 @@ class TextBatchPublisher(object):
         self._processing_context = False
 
     def publish(self, batch, reset=False):
-        
         set_actuator_control(self._set_control, self._actuator_names)
 
         if batch:
@@ -140,7 +140,6 @@ class TextBatchPublisher(object):
 
                         if msg:
                             print("Performing {} = {}".format(action_type, name))
-
                             pub.publish(msg)
                             published_at_least_once = True
 

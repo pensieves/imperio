@@ -141,6 +141,7 @@ class SpeechRecognizer(object):
         return client, streaming_config
 
     def transcribe(self):
+
         client, streaming_config = self._get_speech_client_and_config()
 
         with AudioStreamer(self._rate, self._chunk) as audio_streamer:
@@ -161,6 +162,7 @@ class SpeechRecognizer(object):
             self._handle_responses(responses)
 
     def _handle_responses(self, responses):
+
         for response in responses:
             if response.results and (len(response.results) > 1 or response.results[0].is_final):
 
@@ -174,7 +176,6 @@ class SpeechRecognizer(object):
                         batch = self._text_batcher.get_batch(text, reset=result.is_final)
                     elif result.is_final:
                         batch = [text]
-                    
                     if batch:
                         self._text_batch_publisher.publish(batch, reset=result.is_final)
 
