@@ -8,8 +8,7 @@ from hr_msgs.srv import SetActuatorsControl, SetActuatorsControlRequest
 
 from actuator_names import HEAD_ACTUATOR_NAMES
 
-# LANGUAGE = "en-US" # a BCP-47 language tag
-LANGUAGE = "en-IN"
+from TextBatchProcessor import TextBatchProcessor
 
 CONTEXT_PHRASES = ["Asha", "Hey Asha", "Hey, Asha", "Hi Asha", "Hi, Asha", 
                     "Okay Asha", "Okay, Asha"]
@@ -50,13 +49,14 @@ def set_actuator_control(actuator_control_service, actuator_names, control_type=
     control_request.actuators = actuator_names
     actuator_control_service(control_request)
 
-class TextBatchPublisher(object):
-    def __init__(self, lang=LANGUAGE, context_phrases=CONTEXT_PHRASES, 
+class TextBatchPublisher(TextBatchProcessor):
+    def __init__(self, lang="en-US", context_phrases=CONTEXT_PHRASES, 
                 action_phrases=ACTION_PHRASES, action_map=ACTION_MAP, 
                 expression_phrases=EXPRESSION_PHRASES, expression_map=EXPRESSION_MAP,
                 animation_phrases=ANIMATION_PHRASES, animation_map=ANIMATION_MAP):
 
-        self._lang = lang
+        super(TextBatchPublisher, self).__init__(lang=lang)
+        
         self.context_phrases = context_phrases
 
         self.action_phrases = action_phrases
@@ -96,7 +96,7 @@ class TextBatchPublisher(object):
         self._context_phrase = ""
         self._processing_context = False
 
-    def publish(self, batch, reset=False):
+    def process(self, batch, reset=False):
         set_actuator_control(self._set_control, self._actuator_names)
 
         if batch:
