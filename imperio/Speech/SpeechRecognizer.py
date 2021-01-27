@@ -11,7 +11,7 @@ except ImportError:
 import pyaudio
 from six.moves import queue
 
-from TextBatchPublisher import LANGUAGE, TextBatchPublisher
+from TextBatchProcessor import TextBatchProcessor
 
 # Audio recording parameters
 SAMPLE_RATE = 16000
@@ -86,8 +86,8 @@ class AudioStreamer(object):
 
 class SpeechRecognizer(object):
 
-    def __init__(self, rate=SAMPLE_RATE, chunk=CHUNK, lang=LANGUAGE, 
-                text_batcher=None, text_batch_publisher=None):
+    def __init__(self, rate=SAMPLE_RATE, chunk=CHUNK, lang="en-US", 
+                text_batcher=None, text_batch_processor=None):
         
         self._rate = rate
         self._chunk = chunk
@@ -96,14 +96,14 @@ class SpeechRecognizer(object):
         self._punctuation = True
         self._text_batcher = text_batcher
 
-        self._text_batch_publisher = text_batch_publisher
-        if text_batch_publisher is None:
-            self._text_batch_publisher = TextBatchPublisher()
+        self._text_batch_processor = text_batch_processor
+        if text_batch_processor is None:
+            self._text_batch_processor = TextBatchProcessor(lang=lang)
 
-        self._phrases = (self._text_batch_publisher.context_phrases + 
-                        self._text_batch_publisher.action_phrases + 
-                        self._text_batch_publisher.expression_phrases + 
-                        self._text_batch_publisher.animation_phrases)
+        self._phrases = (getattr(self._text_batch_processor, "context_phrases", []) + 
+                        getattr(self._text_batch_processor, "action_phrases", []) + 
+                        getattr(self._text_batch_processor, "expression_phrases", []) + 
+                        getattr(self._text_batch_processor, "animation_phrases", []))
 
     def _get_speech_client_and_config(self):
         client = speech.SpeechClient()
@@ -177,21 +177,32 @@ class SpeechRecognizer(object):
                     elif result.is_final:
                         batch = [text]
                     if batch:
-                        self._text_batch_publisher.publish(batch, reset=result.is_final)
+                        self._text_batch_processor.process(batch, reset=result.is_final)
 
                     if result.is_final:
                         print("--Final--\n", text, "\n---\n")
 
 if __name__ == "__main__":
-    import rospy
     from TextBatcher import TextBatcher
+    from TextBatchPublisher import TextBatchPublisher
 
+    import rospy
     rospy.init_node("speech_recognizer")
+    
     while True:
         try:
+            # lang = "en-US"
+            lang = "en-IN"
+
             text_batcher = None
             # text_batcher = TextBatcher()
-            SpeechRecognizer(text_batcher=text_batcher).transcribe()
+            
+            # text_batch_processor = None
+            text_batch_processor = TextBatchPublisher(lang=lang)
+
+            SpeechRecognizer(lang=lang, text_batcher=text_batcher, 
+                            text_batch_processor=text_batch_processor).transcribe()
+
         except Exception as exception:
             print(exception)
     # rospy.spin()

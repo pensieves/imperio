@@ -1,11 +1,7 @@
 import logging
 import threading
 
-try:
-    from queue import Queue
-except ImportError:
-    # Python2 compatibility
-    from Queue import Queue
+from six.moves.queue import Queue
 
 import pyaudio
 import rospy
