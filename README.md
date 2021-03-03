@@ -37,13 +37,13 @@ Refer .env file to see examples of environment values and format.
 
 ### Running instructions:
 
-*Robot/Avatar (Imperiused) to Operator (Caster) audio reception:* Receives audio input from robot/avatar captured through its microphone and plays it back on speaker on operator's machine.
+- *Robot/Avatar (Imperiused) to Operator (Caster) audio reception:* Receives audio input from robot/avatar captured through its microphone and plays it back on speaker on operator's machine.
 
-`python3 AudioStreamPlayer.py`
+`python3 imperio/Speech/AudioStreamPlayer.py`
 
-*Operator (Caster) to Robot/Avatar (Imperiused) speech relay or execution:* Receives speech input from operator and either plays it back on robot's/avatar's side, or if wake/context words such as `Asha` is recognized then execute the subsequent action specified.
+- *Operator (Caster) to Robot/Avatar (Imperiused) speech relay or execution:* Receives speech input from operator and either plays it back on robot's/avatar's side, or if wake/context words such as `Asha` is recognized then execute the subsequent action specified.
 
-`python3 SpeechRecognizer.py`
+`python3 imperio/Speech/SpeechRecognizer.py`
 
 ### ToDo:
 - [ ] Edge based speech-to-text (STT) implementation using facebook's word2vec2 model from Huggingface.
