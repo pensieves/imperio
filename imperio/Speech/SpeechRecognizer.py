@@ -1,7 +1,7 @@
 from google.cloud import speech
 
 try:
-    # additional explicit imports for compatibility with 
+    # additional explicit imports for compatibility with
     # google-cloud-speech=1.3.2 for python2
     from google.cloud.speech import enums
     from google.cloud.speech import types
@@ -16,13 +16,16 @@ from TextBatchProcessor import TextBatchProcessor
 # Audio recording parameters
 SAMPLE_RATE = 16000
 CHUNK = int(SAMPLE_RATE / 10)  # 100ms
+PA_FORMAT = pyaudio.paInt16
+
 
 class AudioStreamer(object):
     """Opens a recording stream as a generator yielding the audio chunks."""
 
-    def __init__(self, rate=SAMPLE_RATE, chunk=CHUNK):
+    def __init__(self, rate=SAMPLE_RATE, chunk=CHUNK, pa_format=PA_FORMAT):
         self._rate = rate
         self._chunk = chunk
+        self._pa_format = pa_format
 
         # Create a thread-safe buffer of audio data
         self._buff = queue.Queue()
@@ -31,10 +34,10 @@ class AudioStreamer(object):
     def __enter__(self):
         self._audio_interface = pyaudio.PyAudio()
         self._audio_stream = self._audio_interface.open(
-            format=pyaudio.paInt16,
+            format=self._pa_format,
             # The API currently only supports 1-channel (mono) audio
             # https://goo.gl/z757pE
-            channels=1, 
+            channels=1,
             rate=self._rate,
             input=True,
             frames_per_buffer=self._chunk,
@@ -84,11 +87,17 @@ class AudioStreamer(object):
 
             yield b"".join(data)
 
-class SpeechRecognizer(object):
 
-    def __init__(self, rate=SAMPLE_RATE, chunk=CHUNK, lang="en-US", 
-                text_batcher=None, text_batch_processor=None):
-        
+class SpeechRecognizer(object):
+    def __init__(
+        self,
+        rate=SAMPLE_RATE,
+        chunk=CHUNK,
+        lang="en-US",
+        text_batcher=None,
+        text_batch_processor=None,
+    ):
+
         self._rate = rate
         self._chunk = chunk
 
@@ -100,19 +109,22 @@ class SpeechRecognizer(object):
         if text_batch_processor is None:
             self._text_batch_processor = TextBatchProcessor(lang=lang)
 
-        self._phrases = (getattr(self._text_batch_processor, "context_phrases", []) + 
-                        getattr(self._text_batch_processor, "action_phrases", []) + 
-                        getattr(self._text_batch_processor, "expression_phrases", []) + 
-                        getattr(self._text_batch_processor, "animation_phrases", []))
+        self._phrases = (
+            getattr(self._text_batch_processor, "context_phrases", [])
+            + getattr(self._text_batch_processor, "action_phrases", [])
+            + getattr(self._text_batch_processor, "expression_phrases", [])
+            + getattr(self._text_batch_processor, "animation_phrases", [])
+        )
 
     def _get_speech_client_and_config(self):
         client = speech.SpeechClient()
-        
-        recognition_config = dict(sample_rate_hertz=self._rate,
+
+        recognition_config = dict(
+            sample_rate_hertz=self._rate,
             language_code=self._lang,
             max_alternatives=1,
             enable_automatic_punctuation=self._punctuation,
-            use_enhanced=True
+            use_enhanced=True,
         )
 
         try:
@@ -129,11 +141,9 @@ class SpeechRecognizer(object):
             StreamingRecognitionConfig = types.StreamingRecognitionConfig
 
         config = RecognitionConfig(
-            encoding=encoding,
-            speech_contexts=[speech_contexts],
-            **recognition_config
+            encoding=encoding, speech_contexts=[speech_contexts], **recognition_config
         )
-        
+
         streaming_config = StreamingRecognitionConfig(
             config=config, interim_results=True
         )
@@ -152,10 +162,11 @@ class SpeechRecognizer(object):
                 # Python2 and speech 1.3.2 compatibility
                 StreamingRecognizeRequest = types.StreamingRecognizeRequest
 
-            requests = (StreamingRecognizeRequest(audio_content=content)
+            requests = (
+                StreamingRecognizeRequest(audio_content=content)
                 for content in audio_streamer.stream()
             )
-            
+
             responses = client.streaming_recognize(streaming_config, requests)
 
             # Now, put the transcription responses to use.
@@ -164,16 +175,20 @@ class SpeechRecognizer(object):
     def _handle_responses(self, responses):
 
         for response in responses:
-            if response.results and (len(response.results) > 1 or response.results[0].is_final):
+            if response.results and (
+                len(response.results) > 1 or response.results[0].is_final
+            ):
 
                 result = response.results[0]
                 if result.alternatives:
                     text = result.alternatives[0].transcript
-                    confidence = int(100*result.alternatives[0].confidence)
+                    confidence = int(100 * result.alternatives[0].confidence)
 
                     batch = None
                     if self._text_batcher:
-                        batch = self._text_batcher.get_batch(text, reset=result.is_final)
+                        batch = self._text_batcher.get_batch(
+                            text, reset=result.is_final
+                        )
                     elif result.is_final:
                         batch = [text]
                     if batch:
@@ -182,13 +197,15 @@ class SpeechRecognizer(object):
                     if result.is_final:
                         print("--Final--\n", text, "\n---\n")
 
+
 if __name__ == "__main__":
     from TextBatcher import TextBatcher
     from TextBatchPublisher import TextBatchPublisher
 
     import rospy
+
     rospy.init_node("speech_recognizer")
-    
+
     while True:
         try:
             # lang = "en-US"
@@ -196,12 +213,15 @@ if __name__ == "__main__":
 
             text_batcher = None
             # text_batcher = TextBatcher()
-            
+
             # text_batch_processor = None
             text_batch_processor = TextBatchPublisher(lang=lang)
 
-            SpeechRecognizer(lang=lang, text_batcher=text_batcher, 
-                            text_batch_processor=text_batch_processor).transcribe()
+            SpeechRecognizer(
+                lang=lang,
+                text_batcher=text_batcher,
+                text_batch_processor=text_batch_processor,
+            ).transcribe()
 
         except Exception as exception:
             print(exception)
