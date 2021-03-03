@@ -5,7 +5,9 @@ Named after a charm in the Harry Potter Universe. When cast successfully, it pla
 
 ### Installation:
 *Install python modules mentioned in requirements.txt:*
+
 `pip install -r requirements.txt`
+
 or install using conda in a conda environment.
 
 *Install other external dependencies:*
@@ -15,11 +17,13 @@ or install using conda in a conda environment.
 ### Environment set up:
 
 *Source the ROS setup file:*
+
 `source /opt/ros/noetic/setup.bash`
 
 Sourcing ROS is required to access rospy in ROS 1 (or rclpy in ROS 2) and other ROS modules.
 
 *Update the environment exporting file and source it:*
+
 `source .env`
 
 OR set environment variables explicitly by exporting e.g.: 
@@ -33,10 +37,12 @@ Refer .env file to see examples of environment values and format.
 
 ### Running instructions:
 
-*Robot/Avatar (Imperiused) to Operator (Caster) audio reception:*
+*Robot/Avatar (Imperiused) to Operator (Caster) audio reception:* Receives audio input from robot/avatar captured through its microphone and plays it back on speaker on operator's machine.
+
 `python3 AudioStreamPlayer.py`
 
-*Operator (Caster) to Robot/Avatar (Imperiused) speech relay or execution:*
+*Operator (Caster) to Robot/Avatar (Imperiused) speech relay or execution:* Receives speech input from operator and either plays it back on robot's/avatar's side, or if wake/context words such as `Asha` is recognized then execute the subsequent action specified.
+
 `python3 SpeechRecognizer.py`
 
 ### ToDo:
