@@ -6,6 +6,12 @@ Named after a charm in the Harry Potter Universe. When cast successfully, it pla
 ### Installation:
 *Install python modules mentioned in requirements.txt:*
 
+`pyaudio` has a dependency on `portaudio`. If not using conda, make sure `portaudio` is installed. For example, for Ubuntu, the same can be installed by executing:
+
+`sudo apt install portaudio19-dev`
+
+Then install requirements by executing:
+
 `pip install -r requirements.txt`
 
 or install using conda in a conda environment.
@@ -26,7 +32,7 @@ Sourcing ROS is required to access rospy in ROS 1 (or rclpy in ROS 2) and other 
 
 `source .env`
 
-OR set environment variables explicitly by exporting e.g.: 
+Or set environment variables explicitly by exporting e.g.: 
 ```
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/google-cloud-credentials.json
 export ROS_MASTER_URI=http://<ros_master_ip>:<ros_master_port>
@@ -39,11 +45,11 @@ Refer .env file to see examples of environment values and format.
 
 - *Robot/Avatar (Imperiused) to Operator (Caster) audio reception:* Receives audio input from robot/avatar captured through its microphone and plays it back on speaker on operator's machine.
 
-`python3 imperio/Speech/AudioStreamPlayer.py`
+`python3 imperio/Audio/AudioStreamPlayer.py`
 
 - *Operator (Caster) to Robot/Avatar (Imperiused) speech relay or execution:* Receives speech input from operator and either plays it back on robot's/avatar's side, or if wake/context words such as `Asha` is recognized then execute the subsequent action specified.
 
-`python3 imperio/Speech/SpeechRecognizer.py`
+`python3 imperio/Speech/GoogleSTT.py`
 
 ### ToDo:
 - [ ] Edge based speech-to-text (STT) implementation using facebook's word2vec2 model from Huggingface.
