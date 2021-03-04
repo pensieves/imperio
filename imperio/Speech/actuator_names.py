@@ -1,7 +1,8 @@
+from pathlib import Path
 import pandas as pd
 import re
 
-actuator_names_file = "actuator_names.txt"
+actuator_names_file = Path(__file__).parent / "actuator_names.txt"
 ACTUATOR_NAMES = pd.read_csv(actuator_names_file, header=None).iloc[:, 0]
 
 head_actuator_keywords = [
