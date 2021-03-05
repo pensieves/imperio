@@ -102,6 +102,9 @@ if __name__ == "__main__":
 
     rospy.init_node("STT")
 
+    lang = "en-US"
+    # lang = "en-IN"
+
     text_batcher = None
     # text_batcher = TextBatcher()
 

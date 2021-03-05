@@ -11,13 +11,13 @@ from actuator_names import HEAD_ACTUATOR_NAMES
 from TextBatchProcessor import TextBatchProcessor
 
 CONTEXT_PHRASES = [
-    "Asha",
-    "Hey Asha",
-    "Hey, Asha",
-    "Hi Asha",
-    "Hi, Asha",
-    "Okay Asha",
-    "Okay, Asha",
+    "asha",
+    "hey asha",
+    "hey, asha",
+    "hi asha",
+    "hi, asha",
+    "okay asha",
+    "okay, asha",
 ]
 
 ACTION_PHRASES = ["emergency stop"]
@@ -143,7 +143,7 @@ class TextBatchPublisher(TextBatchProcessor):
         set_actuator_control(self._set_control, self._actuator_names)
 
         if batch:
-            context_phrase = re.search(self._context_regex, batch[0])
+            context_phrase = re.search(self._context_regex, batch[0].lower())
 
             if context_phrase or self._processing_context:
                 self._handle_context_phrase(context_phrase, batch, reset=reset)
