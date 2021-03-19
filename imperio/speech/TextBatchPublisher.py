@@ -4,11 +4,12 @@ import string
 import rospy
 import genpy
 from hr_msgs.msg import TTS, SetExpression, SetAnimation
-from hr_msgs.srv import SetActuatorsControl, SetActuatorsControlRequest
+from hr_msgs.srv import SetActuatorsControl
 
-from actuator_names import HEAD_ACTUATOR_NAMES
+from .TextBatchProcessor import TextBatchProcessor
 
-from TextBatchProcessor import TextBatchProcessor
+from ..robot.hr.actuator.utils import set_actuator_control
+from ..robot.hr.actuator.names import HEAD_ACTUATOR_NAMES
 
 CONTEXT_PHRASES = [
     "asha",
@@ -59,22 +60,6 @@ TOPIC_MAP = {
     "SET_ANIMATION": "/hr/animation/set_animation",
     "CONTROL_ACTUATOR": "/hr/actuators/set_control",
 }
-
-
-def set_actuator_control(
-    actuator_control_service, actuator_names, control_type="CONTROL_ANIMATION"
-):
-    """
-    Set the actuators to desired control type.
-
-    CONTROL_DISABLE: disable actuator
-    CONTROL_MANUAL: control actuator by hand (code)
-    CONTROL_ANIMATION: control actuator by animation
-    """
-    control_request = SetActuatorsControlRequest()
-    control_request.control = getattr(SetActuatorsControlRequest, control_type)
-    control_request.actuators = actuator_names
-    actuator_control_service(control_request)
 
 
 class TextBatchPublisher(TextBatchProcessor):
