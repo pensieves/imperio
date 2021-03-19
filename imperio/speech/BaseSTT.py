@@ -1,6 +1,6 @@
 import pyaudio
-from TextBatchProcessor import TextBatchProcessor
 from abc import ABCMeta, abstractmethod
+from .TextBatchProcessor import TextBatchProcessor
 
 # Audio recording parameters
 SAMPLE_RATE = 16000
@@ -32,7 +32,7 @@ class BaseSTT(object, metaclass=ABCMeta):
 
     @abstractmethod
     def streaming_transcribe(self, **kwargs):
-        r""" Code to transcribe specific to model or service. Should use _handle_recognized in the end."""
+        r""" Code to transcribe specific to model or service."""
         pass
 
     def _process_text(self, text, reset=True):

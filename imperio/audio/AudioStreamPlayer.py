@@ -1,4 +1,3 @@
-import logging
 import threading
 
 from six.moves.queue import Queue
@@ -7,8 +6,6 @@ import pyaudio
 import rospy
 
 from std_msgs.msg import UInt8MultiArray
-
-logger = logging.getLogger("hr.audio_stream.stream_player")
 
 
 class AudioStreamPlayer(object):
@@ -58,13 +55,6 @@ class AudioStreamPlayer(object):
             self.close()
 
     def close(self):
-        logger.info("closing audio stream")
         self.stream.stop_stream()
         self.stream.close()
         self.p.terminate()
-
-
-if __name__ == "__main__":
-    rospy.init_node("audio_stream_player")
-    AudioStreamPlayer()
-    rospy.spin()

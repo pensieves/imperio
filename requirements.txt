@@ -1,3 +1,6 @@
-pyaudio
-google-cloud-speech
-pandas
+pyaudio~=0.2.11
+google-cloud-speech~=2.0.1
+pandas~=1.2.0
+torch~=1.7.1
+transformers~=4.3.3
+python-Levenshtein~=0.12.2

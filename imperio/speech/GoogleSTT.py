@@ -9,8 +9,8 @@ except ImportError:
     pass
 
 import pyaudio
-from AudioStreamer import AudioStreamer
-from BaseSTT import BaseSTT, SAMPLE_RATE, CHUNK
+from .AudioStreamer import AudioStreamer
+from .BaseSTT import BaseSTT, SAMPLE_RATE, CHUNK
 
 PA_FORMAT = pyaudio.paInt16
 
@@ -107,33 +107,3 @@ class GoogleSTT(BaseSTT):
                     confidence = int(100 * result.alternatives[0].confidence)
 
                     self._process_text(text, reset=result.is_final)
-
-
-if __name__ == "__main__":
-    from TextBatcher import TextBatcher
-    from TextBatchPublisher import TextBatchPublisher
-
-    import rospy
-
-    rospy.init_node("GoogleSTT")
-
-    while True:
-        try:
-            # lang = "en-US"
-            lang = "en-IN"
-
-            text_batcher = None
-            # text_batcher = TextBatcher()
-
-            # text_batch_processor = None
-            text_batch_processor = TextBatchPublisher(lang=lang)
-
-            GoogleSTT(
-                lang=lang,
-                text_batcher=text_batcher,
-                text_batch_processor=text_batch_processor,
-            ).streaming_transcribe()
-
-        except Exception as exception:
-            print(exception)
-    # rospy.spin()
