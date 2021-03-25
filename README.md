@@ -57,9 +57,9 @@ for on-device Facebook's Wav2Vec2 model made available by Hugging Face. For usin
 
 `python3 run/google-speech.py --ros_init`
 
-To modify the execution parameters of the on-device model such as stream_overlap and word_overlap for intermediate transcribed text correction and for providing GPU device index in case of availability, the program can be run as:
+To modify the execution parameters of the on-device model such as providing GPU device index in case of availability, the program can be run as:
 
-`python3 run/speech.py --ros_init --stream_count 100 --stream_overlap 10 --word_overlap 6 --gpu_idx 0`
+`python3 run/speech.py --ros_init --gpu_idx 0`
 
 ### ToDo:
 - [ ] Audio to Lip sync on robot/avatar.
