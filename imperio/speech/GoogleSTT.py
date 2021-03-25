@@ -8,26 +8,28 @@ try:
 except ImportError:
     pass
 
-import pyaudio
-from .AudioStreamer import AudioStreamer
-from .BaseSTT import BaseSTT, SAMPLE_RATE, CHUNK
-
-PA_FORMAT = pyaudio.paInt16
+from pyaudio import paInt16
+from ..audio import AudioInputStreamer
+from .BaseSTT import BaseSTT
 
 
 class GoogleSTT(BaseSTT):
     def __init__(
         self,
-        rate=SAMPLE_RATE,
-        chunk=CHUNK,
-        pa_format=PA_FORMAT,
         lang="en-US",
+        audio_streamer=None,
         text_batcher=None,
         text_batch_processor=None,
     ):
 
         super(GoogleSTT, self).__init__(
-            rate, chunk, pa_format, lang, text_batcher, text_batch_processor
+            lang, audio_streamer, text_batcher, text_batch_processor
+        )
+
+        self._audio_streamer = (
+            AudioInputStreamer(pa_format=paInt16)
+            if audio_streamer is None
+            else audio_streamer
         )
 
         self._punctuation = True
@@ -42,7 +44,7 @@ class GoogleSTT(BaseSTT):
         client = speech.SpeechClient()
 
         recognition_config = dict(
-            sample_rate_hertz=self._rate,
+            sample_rate_hertz=self._audio_streamer.processing_rate,
             language_code=self._lang,
             max_alternatives=1,
             enable_automatic_punctuation=self._punctuation,
@@ -76,7 +78,7 @@ class GoogleSTT(BaseSTT):
 
         client, streaming_config = self._get_speech_client_and_config()
 
-        with AudioStreamer(self._rate, self._chunk, self._pa_format) as audio_streamer:
+        with self._audio_streamer as audio_streamer:
 
             try:
                 StreamingRecognizeRequest = speech.StreamingRecognizeRequest

@@ -1,29 +1,23 @@
-import pyaudio
 from abc import ABCMeta, abstractmethod
+from ..audio import VADAudioInputStreamer
 from .TextBatchProcessor import TextBatchProcessor
-
-# Audio recording parameters
-SAMPLE_RATE = 16000
-CHUNK = int(SAMPLE_RATE / 10)
-PA_FORMAT = pyaudio.paFloat32
 
 
 class BaseSTT(object, metaclass=ABCMeta):
     def __init__(
         self,
-        rate=SAMPLE_RATE,
-        chunk=CHUNK,
-        pa_format=PA_FORMAT,
         lang="en-US",
+        audio_streamer=None,
         text_batcher=None,
         text_batch_processor=None,
     ):
 
-        self._rate = rate
-        self._chunk = chunk
-        self._pa_format = pa_format
-
         self._lang = lang
+
+        self._audio_streamer = (
+            VADAudioInputStreamer() if audio_streamer is None else audio_streamer
+        )
+
         self._text_batcher = text_batcher
 
         self._text_batch_processor = text_batch_processor

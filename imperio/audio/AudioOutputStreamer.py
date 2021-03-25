@@ -8,7 +8,7 @@ import rospy
 from std_msgs.msg import UInt8MultiArray
 
 
-class AudioStreamPlayer(object):
+class AudioOutputStreamer(object):
     def __init__(self):
         self.CHUNK_SIZE = 8000
         self.left_chunk = b""
