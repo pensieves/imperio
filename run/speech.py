@@ -2,6 +2,7 @@ import argparse
 
 import sys
 from pathlib import Path
+
 path = str(Path(__file__).parents[1].resolve())
 sys.path.append(path)
 
@@ -15,7 +16,6 @@ parser.add_argument(
     "-r",
     "--ros_init",
     help="Specify if ROS node is to be initialized",
-    default=False,
     action="store_true",
 )
 
@@ -28,10 +28,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-b",
-    "--text_batcher",
-    help="Specify if text needs to be processed in batches",
-    action="store_true"
+    "-c",
+    "--stream_count",
+    type=int,
+    help="Streams count to collect before starting transcription in STT",
+    default=50,
 )
 
 parser.add_argument(
@@ -54,12 +55,11 @@ parser.add_argument(
     "-g",
     "--gpu_idx",
     type=int,
-    help="index of GPU to be used for accelerated computation"
+    help="index of GPU to be used for accelerated computation",
 )
 
 args = parser.parse_args()
 
-text_batcher = None
 text_batch_processor = None
 
 if args.ros_init:
@@ -68,11 +68,8 @@ if args.ros_init:
     rospy.init_node("STT")
     text_batch_processor = TextBatchPublisher(lang=args.lang)
 
-if args.text_batcher:
-    text_batcher = TextBatcher()
 
 STT(
-    text_batcher=text_batcher,
     text_batch_processor=text_batch_processor,
     gpu_idx=args.gpu_idx,
     stream_overlap=args.stream_overlap,

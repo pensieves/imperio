@@ -53,13 +53,13 @@ Refer .env file to see examples of environment values and format.
 
 `python3 run/speech.py --ros_init`
 
-for on-device Facebook's Wav2Vec2 model. For using Google cloud's speech to text execute:
+for on-device Facebook's Wav2Vec2 model made available by Hugging Face. For using Google cloud's speech to text execute:
 
 `python3 run/google-speech.py --ros_init`
 
 To modify the execution parameters of the on-device model such as stream_overlap and word_overlap for intermediate transcribed text correction and for providing GPU device index in case of availability, the program can be run as:
 
-`python3 run/speech.py --ros_init --stream_overlap 10 --word_overlap 6 --gpu_idx 0`
+`python3 run/speech.py --ros_init --stream_count 100 --stream_overlap 10 --word_overlap 6 --gpu_idx 0`
 
 ### ToDo:
 - [ ] Audio to Lip sync on robot/avatar.
