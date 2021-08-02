@@ -54,9 +54,11 @@ chmod +x docker/docker_run.sh
 ```
 
 Now, to build the `imperio` docker image, execute:
+
 `docker/docker_build.sh`
 
 If required, update the ROS_IP and ROS_MASTER_URI environment variables in the `docker/run.env`. Finally, to run the `imperio` docker container, execute:
+
 `docker/docker_run.sh`
 
 Follow the running instructions for the required operation, e.g. `streaming-speech` for *operator (Caster)* to *robot/avatar (Imperiused)* direct speech relay.
