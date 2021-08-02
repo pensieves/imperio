@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from transformers import Wav2Vec2Tokenizer, Wav2Vec2ForCTC
+from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 
 from .BaseSTT import BaseSTT
 
@@ -15,7 +15,7 @@ class STT(BaseSTT):
         audio_streamer=None,
         text_batch_processor=None,
         model="default",
-        tokenizer="default",
+        model_processor="default",
         gpu_idx=None,
     ):
 
@@ -26,9 +26,11 @@ class STT(BaseSTT):
             self._model = Wav2Vec2ForCTC.from_pretrained(self.MODEL_IDENTIFIER)
         self._to_device(self._model, gpu_idx)
 
-        self._tokenizer = tokenizer
-        if tokenizer == "default":
-            self._tokenizer = Wav2Vec2Tokenizer.from_pretrained(self.MODEL_IDENTIFIER)
+        self._model_processor = model_processor
+        if model_processor == "default":
+            self._model_processor = Wav2Vec2Processor.from_pretrained(
+                self.MODEL_IDENTIFIER
+            )
 
     def _to_device(self, model, gpu_idx):
         if model is not None:
@@ -40,20 +42,32 @@ class STT(BaseSTT):
 
         return self
 
-    def transcribe(self, audio_inp, model=None, tokenizer=None):
+    def get_logits(self, audio_inp, model=None, model_processor=None):
+        
         model = self._model if model is None else model
-        tokenizer = self._tokenizer if tokenizer is None else tokenizer
+        
+        model_processor = (
+            self._model_processor if model_processor is None else model_processor
+        )
         device = model.device
 
-        input_values = tokenizer(audio_inp, return_tensors="pt").input_values.to(device)
+        input_values = model_processor(
+            audio_inp, sampling_rate=16000, return_tensors="pt"
+        ).input_values.to(device)
+
         with torch.no_grad():
             logits = model(input_values).logits
+
+        return logits, model_processor
+
+    def transcribe(self, audio_inp, model=None, model_processor=None):
+        logits, model_processor = self.get_logits(audio_inp, model, model_processor)
         predicted_ids = torch.argmax(logits, dim=-1)
-        transcription = tokenizer.batch_decode(predicted_ids)[0]
+        transcription = model_processor.batch_decode(predicted_ids)[0]
 
         return transcription
 
-    def streaming_transcribe(self, model=None, tokenizer=None, gpu_idx=None):
+    def streaming_transcribe(self, model=None, model_processor=None, gpu_idx=None):
 
         self._to_device(model, gpu_idx)
 
@@ -63,7 +77,7 @@ class STT(BaseSTT):
 
                 if stream is not None:
                     audio_inp = np.frombuffer(stream, np.float32)
-                    text = self.transcribe(audio_inp, model, tokenizer)
+                    text = self.transcribe(audio_inp, model, model_processor)
 
                     if text:
                         self._process_text(text, reset=True)

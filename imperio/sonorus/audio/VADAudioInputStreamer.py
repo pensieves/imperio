@@ -13,14 +13,16 @@ class VADAudioInputStreamer(AudioInputStreamer):
     CHANNELS = AudioInputStreamer.CHANNELS
     BLOCKS_PER_SECOND = AudioInputStreamer.BLOCKS_PER_SECOND
     PA_FORMAT = AudioInputStreamer.PA_FORMAT
-    FILE_CHUNK = AudioInputStreamer.FILE_CHUNK
+    CHUNK = AudioInputStreamer.CHUNK
     FMT2TYPE = AudioInputStreamer.FMT2TYPE
 
     def __init__(
         self,
-        aggressiveness=2,
+        aggressiveness=3,
         padding_dur_ms=300,
-        act_inact_ratio=0.8,
+        act_inact_ratio=0.9,
+        accumulate=True,
+        accumulate_count=float("inf"),
         sample_rate=SAMPLE_RATE,
         blocks_per_second=BLOCKS_PER_SECOND,
         pa_format=PA_FORMAT,
@@ -28,7 +30,7 @@ class VADAudioInputStreamer(AudioInputStreamer):
         processing_rate=SAMPLE_RATE,
         device=None,
         file_path=None,
-        file_chunk=FILE_CHUNK,
+        chunk=CHUNK,
         callback=None,
     ):
         r"""aggressiveness is an integer between 0 and 3, 0 being the least 
@@ -42,12 +44,14 @@ class VADAudioInputStreamer(AudioInputStreamer):
             processing_rate=processing_rate,
             device=device,
             file_path=file_path,
-            file_chunk=file_chunk,
+            chunk=chunk,
             callback=callback,
         )
 
         self.vad = webrtcvad.Vad(aggressiveness)
         self.act_inact_ratio = act_inact_ratio
+        self.accumulate = accumulate
+        self.accumulate_count = accumulate_count
 
         frame_dur_ms = (self.processing_block_size * 1000) // self.processing_rate
         self.num_padding_frames = padding_dur_ms // frame_dur_ms
@@ -66,5 +70,7 @@ class VADAudioInputStreamer(AudioInputStreamer):
             sample_rate=self.processing_rate,
             num_padding_frames=self.num_padding_frames,
             act_inact_ratio=self.act_inact_ratio,
+            accumulate=self.accumulate,
+            accumulate_count=self.accumulate_count,
             frame_dtype_conv_fn=self._dtype_conv_fn,
         )

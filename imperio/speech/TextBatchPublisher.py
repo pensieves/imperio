@@ -106,9 +106,6 @@ class TextBatchPublisher(TextBatchProcessor):
         speech_topic = rospy.get_param("speech_topic", TOPIC_MAP["SPEECH_TOPIC"])
         self._speech_pub = rospy.Publisher(speech_topic, TTS, queue_size=10)
 
-        self._set_control = rospy.ServiceProxy(
-            TOPIC_MAP["CONTROL_ACTUATOR"], SetActuatorsControl
-        )
         self._actuator_names = HEAD_ACTUATOR_NAMES.tolist()
 
         self._express_pub = rospy.Publisher(
@@ -125,7 +122,7 @@ class TextBatchPublisher(TextBatchProcessor):
         self._processing_context = False
 
     def process(self, batch, reset=False):
-        set_actuator_control(self._set_control, self._actuator_names)
+        set_actuator_control(self._actuator_names)
 
         if batch:
             context_phrase = re.search(self._context_regex, batch[0].lower())

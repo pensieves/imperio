@@ -1,0 +1,143 @@
+mappings:
+  cereproc_en:
+    A-I: [a, aa, ai, au, ae, ah, aw, ax, ay, ey]
+    C-D-G-K-N-S-TH: [ch, d, dh, g, h, hh, jh, k, n, ng, s, sh, t, th, z, zh, dx, er]
+    E: [e, e@, ei, ii, iy, ei, eh]
+    F-V: [f, v]
+    L: ['@', '@@', i, i@, ih, l, r, y, R, rl]
+    M: [b, m, p]
+    O: [o, oi, oo, ou, ao, ow, oy, oh]
+    Q-W: [w, q]
+    Sil: [sil]
+    U: [u, u@, uh, uu, uw, j]
+  cereproc_de:
+    A-I: [a, aa, ai, au, ae, ah, aw, ax, ay, ey, aeh, an]
+    C-D-G-K-N-S-TH: [ch, d, dh, g, h, hh, jh, k, n, ng, s, sh, t, th, z, zh, dx, er, dzh, tsh, ts]
+    E: [e, e@, ei, ii, iy, ei, eh, x, en]
+    F-V: [f, v, rv]
+    L: ['@', '@@', i, i@, ih, l, r, y, R, rl]
+    M: [b, m, p, pf]
+    O: [o, oi, oo, ou, ao, ow, oy, oh, oe, oeh, 'on', oen]
+    Q-W: [w, q]
+    Sil: [sil]
+    U: [u, u@, uh, uu, uw, j, ue, ueh]
+  pinyin:
+    A-I: [a, ai, ao, an, ang]
+    C-D-G-K-N-S-TH: [ch, d, g, h, k, n, s, sh, z, zh, j, c]
+    E: [e, ei, er, en, eng, t, x, ia, iao, iou, ian, iang, i, iu, ie, in, ing, iong, y]
+    F-V: [f]
+    L: [l, r]
+    M: [b, m, p]
+    O: [o, uo, ou, ong]
+    Q-W: [w]
+    Sil: [sil]
+    U: [u, ui, un, v, ve, ue, vn, q, ua, uai, uan, van, uang, uei, uen, ueng]
+  polly:
+    A-I: [a, '@', E]
+    C-D-G-K-N-S-TH: [k, s, S, T]
+    E: [e, t, i]
+    F-V: [f]
+    L: [l, r]
+    M: [p]
+    O: [O]
+    Q-W: [w]
+    Sil: [sil]
+    U: [u, J, o]
+  polly_full:
+    polly_a: [a]
+    polly_at: ['@']
+    polly_e: [e]
+    polly_ee: [E]
+    polly_f: [f]
+    polly_i: [i]
+    polly_jj: [J]
+    polly_k: [k]
+    polly_l: [l]
+    polly_o: [o]
+    polly_oo: [O]
+    polly_p: [p]
+    polly_r: [r]
+    polly_s: [s]
+    polly_sil: [sil]
+    polly_ss: [S]
+    polly_t: [t]
+    polly_tt: [T]
+    polly_u: [u]
+    polly_w: [w]
+  operator_voice:
+    A-I: [AA, AI, AU, AE, AH, AW, AX, AY, EY]
+    C-D-G-K-N-S-TH: [CH, D, DH, G, H, HH, JH, K, N, NG, S, SH, T, TH, Z, ZH, DX, ER]
+    E: [IY, EH]
+    F-V: [F, V]
+    L: [IH, L, Y, R]
+    M: [B, M, P]
+    O: [AO, OW, OY]
+    Q-W: [W]
+    Sil: [SIL, SPN]
+    U: [UH, UW]
+params:
+  cereproc:
+    A-I: {duration: 2.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    C-D-G-K-N-S-TH: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    E: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    F-V: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    L: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    M: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    O: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Q-W: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Sil: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    U: {duration: 1.8, magnitude: 0.99, rampin: 0.3, rampout: 0.2}
+  pinyin:
+    A-I: {duration: 2.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    C-D-G-K-N-S-TH: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    E: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    F-V: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    L: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    M: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    O: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Q-W: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Sil: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    U: {duration: 1.8, magnitude: 0.99, rampin: 0.3, rampout: 0.2}
+  polly:
+    A-I: {duration: 2.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    C-D-G-K-N-S-TH: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    E: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    F-V: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    L: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    M: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    O: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Q-W: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Sil: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    U: {duration: 1.8, magnitude: 0.99, rampin: 0.3, rampout: 0.2}
+  polly_full:
+    polly_a: {duration: 2.2, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_at: {duration: 2.2, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_e: {duration: 2.5, magnitude: 0.99, rampin: 0.4, rampout: 0.25}
+    polly_ee: {duration: 2.2, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_f: {duration: 1.0, magnitude: 0.99, rampin: 0.25, rampout: 0.25}
+    polly_i: {duration: 2.5, magnitude: 0.99, rampin: 0.4, rampout: 0.25}
+    polly_jj: {duration: 2.0, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_k: {duration: 1.5, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_l: {duration: 1.0, magnitude: 0.99, rampin: 0.25, rampout: 0.25}
+    polly_o: {duration: 2.0, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_oo: {duration: 2.3, magnitude: 0.99, rampin: 0.4, rampout: 0.25}
+    polly_p: {duration: 1.2, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_r: {duration: 1.0, magnitude: 0.99, rampin: 0.25, rampout: 0.25}
+    polly_s: {duration: 1.5, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_sil: {duration: 2.0, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_ss: {duration: 1.5, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_t: {duration: 2.5, magnitude: 0.99, rampin: 0.4, rampout: 0.25}
+    polly_tt: { duration: 1.5, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_u: {duration: 2.0, magnitude: 0.99, rampin: 0.35, rampout: 0.25}
+    polly_w: {duration: 1.0, magnitude: 0.99, rampin: 0.25, rampout: 0.25}
+  operator_voice:
+    A-I: {duration: 2.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    C-D-G-K-N-S-TH: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    E: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    F-V: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    L: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    M: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    O: {duration: 1.8, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Q-W: {duration: 1.5, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    Sil: {duration: 1.0, magnitude: 0.99, rampin: 0.2, rampout: 0.2}
+    U: {duration: 1.8, magnitude: 0.99, rampin: 0.3, rampout: 0.2}
