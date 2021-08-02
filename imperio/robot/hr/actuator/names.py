@@ -6,17 +6,17 @@ actuator_names_file = Path(__file__).parent / "actuator_names.txt"
 ACTUATOR_NAMES = pd.read_csv(actuator_names_file, header=None).iloc[:, 0]
 
 head_actuator_keywords = [
-    "Brow",
-    "Lid",
-    "Eye",
+    # "Brow",
+    # "Lid",
+    # "Eye",
     "Cheek",
     "Lip",
     "Frown",
-    "Smile",
-    "Jaw",
+    # "Smile",
+    # "Jaw",
     "Tongue",
-    "Gimbal",
-    "Neck",
+    # "Gimbal",
+    # "Neck",
 ]
 
 head_actuator_regex = "({})".format("|".join(head_actuator_keywords))

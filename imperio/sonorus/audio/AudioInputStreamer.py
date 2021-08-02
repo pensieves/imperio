@@ -15,9 +15,10 @@ class AudioInputStreamer(object):
     CHANNELS = 1
     BLOCKS_PER_SECOND = 50
     PA_FORMAT = pyaudio.paFloat32
-    FILE_CHUNK = 320
+    CHUNK = 320
 
     FMT2TYPE = {
+        pyaudio.paUInt8: np.uint8,
         pyaudio.paInt8: np.int8,
         pyaudio.paInt16: np.int16,
         pyaudio.paInt32: np.int32,
@@ -33,7 +34,7 @@ class AudioInputStreamer(object):
         processing_rate=SAMPLE_RATE,
         device=None,
         file_path=None,
-        file_chunk=FILE_CHUNK,
+        chunk=CHUNK,
         callback=None,
     ):
 
@@ -50,9 +51,8 @@ class AudioInputStreamer(object):
         self._callback = callback if callback is not None else self._fill_buffer
 
         self.device = device
-        if file_path is not None:
-            self.file_chunk = file_chunk
-            self.file = wave.open(file_path, "rb")
+        self.chunk = chunk
+        self.file = wave.open(file_path, "rb") if file_path else None
 
         self.closed = True
 
@@ -101,7 +101,7 @@ class AudioInputStreamer(object):
     def _stream_callback(self, in_data, frame_count, time_info, status_flags):
         r"""Callback to be passed to pyaudio"""
         if getattr(self, "file", None):
-            in_data = self.file.readframes(self.file_chunk)
+            in_data = self.file.readframes(self.chunk)
         self._callback(in_data)
         return None, pyaudio.paContinue
 
@@ -112,7 +112,7 @@ class AudioInputStreamer(object):
                 data=self._buff.get(),
                 sample_rate=self.sample_rate,
                 resample_rate=self.processing_rate,
-                dtype=FMT2TYPE[self.pa_format],
+                dtype=self.FMT2TYPE[self.pa_format],
             )
         except queue.Empty:
             data = None

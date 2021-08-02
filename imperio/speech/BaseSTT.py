@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from ..audio import VADAudioInputStreamer
+from ..sonorus.audio import VADAudioInputStreamer
 from .TextBatchProcessor import TextBatchProcessor
 
 
