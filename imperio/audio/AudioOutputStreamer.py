@@ -3,46 +3,26 @@ import threading
 from six.moves.queue import Queue
 
 import pyaudio
+import rospy
 
 from std_msgs.msg import UInt8MultiArray
 
 
 class AudioOutputStreamer(object):
-
-    CHUNK_SIZE = 8000
-    SAMPLE_RATE = 16000
-    CHANNELS = 1
-    PA_FORMAT = pyaudio.paFloat32
-
-    def __init__(
-        self,
-        chunk_size=CHUNK_SIZE,
-        sample_rate=SAMPLE_RATE,
-        channels=CHANNELS,
-        pa_format=PA_FORMAT,
-        device=None,
-    ):
-
-        self.chunk_size = chunk_size
-        self.sample_rate = sample_rate
-
+    def __init__(self):
+        self.CHUNK_SIZE = 8000
         self.left_chunk = b""
+        self.sample_rate = rospy.get_param("audio_rate", 16000)
+
         self.buffer = Queue()
-
-        self.channels = channels
-        self.pa_format = pa_format
-        self.device = device
-        self.pa = pyaudio.PyAudio()
-
-        self.audio_stream = self.pa.open(
-            format=self.pa_format,
-            channels=self.channels,
+        self.p = pyaudio.PyAudio()
+        self.stream = self.p.open(
+            format=self.p.get_format_from_width(2),
+            channels=1,
             rate=self.sample_rate,
             output=True,
             start=False,
-            output_device_index=self.device,
         )
-
         self.job = threading.Thread(target=self.run)
         self.job.daemon = True
         self.job.start()
