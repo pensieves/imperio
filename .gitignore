@@ -1,5 +1,8 @@
-logs/*
+data/
+exp/
+logs/
 .virtual_documents
+.ipynb_checkpoints
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
