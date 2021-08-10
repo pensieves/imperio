@@ -1,7 +1,11 @@
 # imperio
 Named after a charm in the Harry Potter Universe. When cast successfully, it places the other organism completely under the caster's control. In muggles' terminology, this is a repository of modules for interacting to and through an avatar or a tele-operated robot, including using Speech and Natural Language for action execution on robots.
 
-## Getting Started:
+## Table of Contents:
+- [Installation](#installation)
+- [Environment set up](#environment-set-up)
+- [Docker set up](#docker-set-up)
+- [Running instructions](#running-instructions)
 
 ### Installation:
 *Install python modules mentioned in requirements.txt:*
@@ -43,7 +47,7 @@ export ROS_IP=<local_machine_ros_ip>
 
 Refer .env file to see examples of environment values and format.
 
-### Using Docker:
+### Docker set up:
 
 Ensure that external installation files are present in the `docker/externals` folder. Execute the following commands from the project root directory i.e. current directory:
 
@@ -59,9 +63,21 @@ Now, to build the `imperio` docker image, execute:
 
 If required, update the ROS_IP and ROS_MASTER_URI environment variables in the `docker/run.env`. Finally, to run the `imperio` docker container, execute:
 
-`docker/docker_run.sh`
+`docker/docker_run.sh <container_name>`
 
-Follow the running instructions for the required operation, e.g. `streaming-speech` for *operator (Caster)* to *robot/avatar (Imperiused)* direct speech relay.
+The container_name could be specified based on the task e.g. it can be named `imperio_speech` or `imperio_audio` for `streaming-speech` or `audio` tasks respectively. Then follow the running instructions for the required tasks e.g.:
+
+```
+docker/docker_run.sh imperio_speech
+python3 examples/streaming-speech.py --voice_conv_fn change_pitch --multiplier 1.5
+```
+
+or
+
+```
+docker/docker_run.sh imperio_audio
+python3 examples/audio.py
+```
 
 ### Running instructions:
 

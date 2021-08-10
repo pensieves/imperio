@@ -9,10 +9,10 @@ from std_msgs.msg import UInt8MultiArray
 
 
 class AudioOutputStreamer(object):
-    def __init__(self):
-        self.CHUNK_SIZE = 8000
+    def __init__(self, chunk_size=8000, sample_rate=16000):
+        self.chunk_size = chunk_size
         self.left_chunk = b""
-        self.sample_rate = rospy.get_param("audio_rate", 16000)
+        self.sample_rate = rospy.get_param("audio_rate", sample_rate)
 
         self.buffer = Queue()
         self.p = pyaudio.PyAudio()
@@ -37,12 +37,12 @@ class AudioOutputStreamer(object):
         """Appends the audio chunk to data queue"""
         chunk = msg.data
         chunk = self.left_chunk + chunk
-        if len(chunk) < self.CHUNK_SIZE:
+        if len(chunk) < self.chunk_size:
             self.left_chunk = chunk
             return
         else:
-            self.left_chunk = chunk[self.CHUNK_SIZE :]
-            chunk = chunk[: self.CHUNK_SIZE]
+            self.left_chunk = chunk[self.chunk_size :]
+            chunk = chunk[: self.chunk_size]
             self.buffer.put(chunk)
 
     def run(self):
