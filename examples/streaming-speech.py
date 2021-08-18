@@ -49,6 +49,14 @@ parser.add_argument(
     default=1.5,  # for female voice target using change_pitch function
 )
 
+parser.add_argument(
+    "-q",
+    "--pub_queue_size",
+    type=int,
+    help="Queue size of the Speech and Phoneme Publishers",
+    default=2500,
+)
+
 args = parser.parse_args()
 
 phoneme_segmenter = PhonemeSegmenter.from_url() # with default params
@@ -56,10 +64,11 @@ phoneme_segmenter = PhonemeSegmenter.from_url() # with default params
 audio_streamer = VADAudioInputStreamer(pa_format=pyaudio.paInt16,)
 
 phonemes_pub = PhonemesPublisher(
-    default_viseme_params=dict(magnitude=0.99, rampin=0.01, rampout=0.01,)
+    default_viseme_params=dict(magnitude=0.99, rampin=0.01, rampout=0.01,),
+    pub_queue_size=args.pub_queue_size,
 )
 
-audio_pub = rospy.Publisher(args.topic, UInt8MultiArray, queue_size=2500)
+audio_pub = rospy.Publisher(args.topic, UInt8MultiArray, queue_size=args.pub_queue_size)
 
 
 def producer_func(msg, segmenter=phoneme_segmenter.segment):
