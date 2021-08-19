@@ -1,4 +1,6 @@
 from copy import deepcopy
+import random
+import numpy as np
 from .VisemesPublisher import (
     VisemesPublisher,
     VISEMES_TOPIC,
@@ -33,6 +35,24 @@ class PhonemesPublisher(VisemesPublisher):
 
         self.viseme_params = viseme_params
         self.default_params = default_viseme_params
+
+    def random(self, duration, chunk=0.08, seed=42):
+        random_gen = random.Random(seed)
+        phonemes = list(self.phoneme2viseme.keys())
+
+        phonemes = [
+            {
+                self.phoneme_key: random.choice(phonemes), 
+                "start": j, 
+                "duration": round(min(chunk, duration-i*chunk), 3)
+            }
+            for i,j in enumerate(np.arange(0, duration, chunk))
+        ]
+
+        # make the last phoneme always a silence phoneme
+        phonemes[-1][self.phoneme_key] = self.sil
+        
+        return phonemes
 
     def publish(self, phonemes):
         self.visemes_publish(self.to_visemes(phonemes))
