@@ -59,7 +59,7 @@ def change_gender(
 
 def change_pitch(
     sound: parselmouth.Sound,
-    factor: float = 1.5,
+    pitch_factor: float = 1.5,
     time_step: float = 0.01,
     min_pitch: float = 75,
     max_pitch: float = 600,
@@ -74,7 +74,7 @@ def change_pitch(
 
     pitch_tier = call(manipulation, "Extract pitch tier")
 
-    args = (sound.xmin, sound.xmax, factor)
+    args = (sound.xmin, sound.xmax, pitch_factor)
     call(pitch_tier, "Multiply frequencies", *args)
 
     call([pitch_tier, manipulation], "Replace pitch tier")

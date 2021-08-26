@@ -1,2 +1,3 @@
+from .AudioOutputStreamer import AudioOutputStreamer
 from .AudioInputStreamer import AudioInputStreamer
 from .VADAudioInputStreamer import VADAudioInputStreamer

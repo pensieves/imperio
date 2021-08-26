@@ -20,7 +20,7 @@ class VADAudioInputStreamer(AudioInputStreamer):
         self,
         aggressiveness=3,
         padding_dur_ms=300,
-        act_inact_ratio=0.9,
+        act_inact_ratio=0.95,
         accumulate=True,
         accumulate_count=float("inf"),
         sample_rate=SAMPLE_RATE,

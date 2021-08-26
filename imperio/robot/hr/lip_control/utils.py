@@ -1,4 +1,5 @@
 import yaml
+import random
 from pathlib import Path
 
 visemes_config_yaml = Path(__file__).parent / "visemes_config.yaml"
@@ -27,6 +28,7 @@ def get_viseme2phoneme(
 
     return viseme2phoneme, sil, viseme_params
 
+
 def get_phoneme2viseme(mapping="operator_voice", drop_params=set()):
 
     viseme2phoneme, sil, viseme_params = get_viseme2phoneme(
@@ -41,3 +43,24 @@ def get_phoneme2viseme(mapping="operator_voice", drop_params=set()):
     sil = "polly_sil" if mapping == "polly_full" else "Sil"
 
     return phoneme2viseme, sil, viseme_params
+
+
+def drop_random(phone_visem_list, seed=None, drop_th=0.8):
+
+    random_gen = random.Random(seed)
+    phone_visem_list = [i for i in phone_visem_list if random_gen.random() >= drop_th]
+
+    start = 0
+    for phone_visem in phone_visem_list:
+        phone_visem["start"] = start
+        start += phone_visem["duration"]
+
+    return phone_visem_list
+
+
+def shift_time(phone_visem_list, shift=0):
+    if shift:
+        phone_visem_list = deepcopy(phone_visem_list)
+        for phone_visem in phone_visem_list:
+            phone_visem["start"] += shift
+    return phone_visem_list

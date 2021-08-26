@@ -6,6 +6,8 @@ class SingleProcessor(Processor):
     def __init__(
         self,
         target_func,
+        starter_func=None,
+        starter_func_kwargs=dict(),
         in_queue=None,
         out_queue=None,
         store_out=False,
@@ -14,6 +16,8 @@ class SingleProcessor(Processor):
 
         super(SingleProcessor, self).__init__(
             target_func,
+            starter_func=starter_func,
+            starter_func_kwargs=starter_func_kwargs,
             in_queue=in_queue,
             out_queue=out_queue,
             store_out=store_out,
@@ -29,5 +33,8 @@ class SingleProcessor(Processor):
             self.callback([result])
 
     def run(self):
+        if self.starter_func:
+            self.starter_func(**self.starter_func_kwargs)
+
         while True:
             self.process()

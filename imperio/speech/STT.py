@@ -43,9 +43,9 @@ class STT(BaseSTT):
         return self
 
     def get_logits(self, audio_inp, model=None, model_processor=None):
-        
+
         model = self._model if model is None else model
-        
+
         model_processor = (
             self._model_processor if model_processor is None else model_processor
         )

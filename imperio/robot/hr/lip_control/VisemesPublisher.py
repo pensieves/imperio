@@ -15,6 +15,7 @@ def set_control(
 ):
     set_actuator_control(actuator_names, control_type=control_type)
 
+
 def reset_control(
     actuator_names=HEAD_ACTUATOR_NAMES.tolist(), control_type="CONTROL_MANUAL"
 ):
@@ -23,9 +24,9 @@ def reset_control(
 
 class VisemesPublisher(object):
     def __init__(
-        self, 
-        topic=VISEMES_TOPIC, 
-        pub_queue_size=10, 
+        self,
+        topic=VISEMES_TOPIC,
+        pub_queue_size=10,
         set_control=set_control,
         reset_control=reset_control,
     ):
