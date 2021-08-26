@@ -65,11 +65,11 @@ If required, update the ROS_IP and ROS_MASTER_URI environment variables in the `
 
 `docker/docker_run.sh <container_name>`
 
-The container_name could be specified based on the task e.g. it can be named `imperio_speech` or `imperio_audio` for `streaming-speech` or `audio` tasks respectively. Then follow the running instructions for the required tasks e.g.:
+The container_name could be specified based on the task e.g. it can be named `imperio_speech` or `imperio_audio` for `streaming_speech` or `audio` tasks respectively. Then follow the running instructions for the required tasks e.g.:
 
 ```
 docker/docker_run.sh imperio_speech
-python3 examples/streaming-speech.py --voice_conv_fn change_pitch --multiplier 1.5
+python3 examples/streaming_speech.py --voice_conv_fn change_pitch --multiplier 1.5
 ```
 
 or
@@ -83,11 +83,11 @@ python3 examples/audio.py
 
 - *Operator (Caster) to Robot/Avatar (Imperiused) direct speech relay or execution:* Receives speech input from operator and plays it back on robot's/avatar's side directly maintaining audio content as is, with gender conversion if specified. To relay speech without gender voice manipulation execute:
 
-`python3 examples/streaming-speech.py`
+`python3 examples/streaming_speech.py`
 
 To relay speech with gender voice manipulation, two praat voice conversion functions are supported - change_gender and change_pitch, with change_pitch being preferable. *To convert male voice to female, specify multiplier values > 1 and vice-versa for female to male voice conversion.* A sample command to execute is:
 
-`python3 examples/streaming-speech.py --voice_conv_fn change_pitch --multiplier 1.5`
+`python3 examples/streaming_speech.py --voice_conv_fn change_pitch --multiplier 1.5`
 
 - *Operator (Caster) to Robot/Avatar (Imperiused) indirect speech relay or execution:* Receives speech input from operator and either plays it back on robot's/avatar's side, or if wake/context words such as `Asha` is recognized then execute the subsequent action specified.
 

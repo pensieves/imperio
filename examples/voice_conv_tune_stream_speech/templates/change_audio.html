@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>change_pitch parameter tuning</title>
+    </head>
+
+    <body>
+        <h1 align='center'>change_pitch parameter tuning</h1>
+        <div style="width: 10%; height: 50%; float:left;"></div>
+        <div style="width: 60%; height: 50%; float:left;">
+        <form method="POST">
+            
+            {% for param in params %}
+                <span>{{param.name}}</span>
+                <input type="range" name="{{param.name}}" min="{{param.min}}" max="{{param.max}}" step="{{param.step}}" value="{{param.value}}" oninput="updateTextInput(this.value,'{{param.name}}')";>
+                <label id="{{param.name}}">{{param.value}}</label>
+                <script type="text/javascript" src="static/calib.js"></script>
+                <br></br>
+                <br></br>
+            {% endfor %}
+
+            <input type="submit" name="{{submit_button_name}}" value="{{play_source_button_value}}">
+
+            <input type="submit" name="{{submit_button_name}}" value="{{play_changed_button_value}}">
+            
+            <input type="submit" name="{{submit_button_name}}" value="{{finalize_params_button_value}}">
+
+            <br></br>
+            <br></br>            
+        </form>
+        </div>
+        
+        <div style="width: 30%; height: 50%; float:right;">
+            {% for param in params %}
+                {% if loop.index != 1 %}
+                    <br></br>
+                    <br></br>
+                {% endif %}
+                <span>{{param.name}} : {{param.value}}</span>
+            {% endfor %}
+        </div>
+
+    </body>
+
+</html>

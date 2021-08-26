@@ -108,7 +108,7 @@ def vad_collector(
     vad=webrtcvad.Vad(3),
     sample_rate=16000,
     num_padding_frames=20,
-    act_inact_ratio=0.9,
+    act_inact_ratio=0.95,
     accumulate=True,
     accumulate_count=float("inf"),
     frame_dtype_conv_fn=lambda frame, float_type, int_type: frame,

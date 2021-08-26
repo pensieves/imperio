@@ -14,6 +14,7 @@ pandas~=1.2.4
 datasets~=1.5.0
 praat-parselmouth~=0.4.0
 wget~=3.2
+flask~=1.1.2
 
 #speechlm
 #pyflashlight

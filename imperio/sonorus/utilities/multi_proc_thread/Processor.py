@@ -6,6 +6,8 @@ class Processor(object, metaclass=ABCMeta):
     def __init__(
         self,
         target_func,
+        starter_func=None,
+        starter_func_kwargs=dict(),
         in_queue=None,
         out_queue=None,
         store_out=False,
@@ -19,6 +21,10 @@ class Processor(object, metaclass=ABCMeta):
             self.out_queue = out_queue if out_queue else mp.Queue()
 
         self.target_func = target_func
+
+        self.starter_func = starter_func
+        self.starter_func_kwargs = starter_func_kwargs
+
         self.callback = callback if callback else self.default_callback
 
     @abstractmethod
