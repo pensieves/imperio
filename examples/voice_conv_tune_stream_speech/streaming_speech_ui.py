@@ -4,14 +4,22 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parents[1].resolve()))
 sys.path.append(str(Path(__file__).parents[2].resolve()))
 
-from flask import Flask, request, Response, render_template
+from flask import (
+    Flask,
+    request,
+    render_template,
+    redirect,
+    url_for,
+)
 import time
 
 import pyaudio
 import numpy as np
 import librosa
 import parselmouth
+from pathlib import Path
 
+from imperio.sonorus.utilities.utils import to_yaml, from_yaml
 from imperio.sonorus.audio import AudioInputStreamer, AudioOutputStreamer
 from imperio.sonorus.audio.utils import audio_int2float, audio_float2int
 from imperio.sonorus.audio.praat import change_pitch, change_gender
@@ -19,13 +27,15 @@ from streaming_speech import stream_speech
 
 app = Flask(__name__)
 
+DATA_DIR = Path(__file__).parent / "data"
+
 SAMPLE_RATE = 16000
 PA_FORMAT = pyaudio.paInt16
 
-RECORD_BUTTON_NAME = "record_button"
-RECORD_BUTTON_VALUE = "Record Audio"
+TUNE_BUTTON_NAME = "Tune Voice Conversion"
+RUN_BUTTON_NAME = "Stream Speech"
 
-PLAY_BUTTON_NAME = "play_button"
+RECORD_BUTTON_VALUE = "Record Audio"
 PLAY_BUTTON_VALUE = "Play Recorded"
 
 SUBMIT_BUTTON_NAME = "submit_button"
@@ -37,7 +47,7 @@ FINALIZE_PARAMS_BUTTON_VALUE = "Finalize Params"
 SOURCE_AUDIO = b""
 CHANGED_AUDIO = b""
 
-data = {"slider1": 0, "slider2": 0, "slider3": 0, "slider4": 0, "slider5": 0}
+CHANGE_PARAMS_YAML = "change_params.yaml"
 
 
 def record_audio(audio_dur=5):
@@ -79,7 +89,9 @@ def play_audio(audio="source"):
 
 @app.route("/")
 def home():
-    return render_template("home.html", record_button_value=RECORD_BUTTON_VALUE)
+    return render_template(
+        "home.html", tune_button_name=TUNE_BUTTON_NAME, run_button_name=RUN_BUTTON_NAME,
+    )
 
 
 @app.route("/record_audio", methods=["GET", "POST"])
@@ -94,14 +106,14 @@ def record():
     play_recorded = False
 
     if request.method == "POST":
-        if request.form.get(RECORD_BUTTON_NAME) == RECORD_BUTTON_VALUE:
+        if request.form.get(SUBMIT_BUTTON_NAME) == RECORD_BUTTON_VALUE:
             global SOURCE_AUDIO
             SOURCE_AUDIO, audio_dur = record_audio()
             print(
                 f"Recorded audio = {SOURCE_AUDIO[:5]} ... of len = {len(SOURCE_AUDIO)} and dur = {audio_dur}"
             )
 
-        elif request.form.get(PLAY_BUTTON_NAME) == PLAY_BUTTON_VALUE:
+        elif request.form.get(SUBMIT_BUTTON_NAME) == PLAY_BUTTON_VALUE:
             play_audio(audio="source")
 
         recording_status = (
@@ -115,11 +127,10 @@ def record():
     template = render_template(
         template_html,
         recording_status=recording_status,
-        record_button_name=RECORD_BUTTON_NAME,
+        submit_button_name=SUBMIT_BUTTON_NAME,
         record_button_value=RECORD_BUTTON_VALUE,
         recording_text=recording_text,
         play_recorded=play_recorded,
-        play_button_name=PLAY_BUTTON_NAME,
         play_button_value=PLAY_BUTTON_VALUE,
     )
 
@@ -154,14 +165,24 @@ def change_audio(change_func, params, request):
                 sampling_frequency=SAMPLE_RATE,
             )
 
-            sound = change_func(sound, **kwargs)
+            if change_func == "change_pitch":
+                sound = change_pitch(sound, **kwargs)
+            else:
+                sound = change_gender(sound, **kwargs)
+
             CHANGED_AUDIO = audio_float2int(sound.values).tobytes()
 
             play_audio(audio="changed")
 
         if request.form[SUBMIT_BUTTON_NAME] == FINALIZE_PARAMS_BUTTON_VALUE:
             params = update_params(params, request.form)
-            # pass
+
+            change_params = {p["name"]: p["value"] for p in params}
+            change_params["voice_conv_fn"] = change_func
+
+            to_yaml(data=change_params, file=Path(DATA_DIR) / CHANGE_PARAMS_YAML)
+
+            return redirect(url_for("run_streaming_speech"))
 
     template = render_template(
         template_html,
@@ -178,7 +199,7 @@ def change_audio(change_func, params, request):
 @app.route("/change_pitch", methods=["GET", "POST"])
 def change_audio_pitch():
 
-    change_func = change_pitch
+    change_func = "change_pitch"
     params = [
         dict(
             name="pitch_factor", default_value=1.5, value=1.5, min=0, max=3, step=0.05
@@ -196,7 +217,7 @@ def change_audio_pitch():
 @app.route("/change_gender", methods=["GET", "POST"])
 def change_audio_gender():
 
-    change_func = change_gender
+    change_func = "change_gender"
     params = [
         dict(name="min_pitch", default_value=75, value=75, min=50, max=100, step=5),
         dict(name="max_pitch", default_value=600, value=600, min=500, max=800, step=5),
@@ -216,6 +237,26 @@ def change_audio_gender():
     ]
 
     return change_audio(change_func, params, request)
+
+
+@app.route("/run_streaming_speech", methods=["GET", "POST"])
+def run_streaming_speech():
+
+    template_html = "run_streaming_speech.html"
+
+    if request.method == "POST":
+        if request.form[SUBMIT_BUTTON_NAME] == RUN_BUTTON_NAME:
+            change_params = from_yaml(Path(DATA_DIR) / CHANGE_PARAMS_YAML)
+            print(f"change_params = {change_params}")
+            stream_speech(disable_ros_signals=True, **change_params)
+
+    template = render_template(
+        template_html,
+        submit_button_name=SUBMIT_BUTTON_NAME,
+        run_button_name=RUN_BUTTON_NAME,
+    )
+
+    return template
 
 
 if __name__ == "__main__":

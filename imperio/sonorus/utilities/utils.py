@@ -1,9 +1,25 @@
 from pathlib import Path
+import yaml
 import uuid
 import wget
 import tarfile, zipfile
 
 from .. import CACHE_DIR
+
+
+def to_yaml(data, file, safe_dump=True, default_flow_style=False):
+    dumper = yaml.safe_dump if safe_dump else yaml.dump
+    with open(file, "w") as f:
+        dumper(data, f, default_flow_style=default_flow_style)
+
+
+def from_yaml(file, safe_load=True):
+    data = {}
+    if Path(file).exists():
+        loader = yaml.safe_load if safe_load else yaml.load
+        with open(file, "r") as f:
+            data = loader(f)
+    return data
 
 
 def create_random_dir(work_dir=CACHE_DIR, prefix="sonorus"):

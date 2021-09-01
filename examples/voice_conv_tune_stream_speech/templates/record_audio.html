@@ -7,13 +7,13 @@
   </head>
 
   <body>
-    <h1 align="center"> Calibrate Audio </h1>
+    <h1 align="center"> Record Audio </h1>
 
     <p align="center">Please click on the "<i>{{record_button_value}}</i>" button and say <b>{{recording_text}}</b> to record audio for calibrating voice conversion.</p>
 
     <form align="center" method="POST">
         <div style="text-align:center">  
-            <input type="submit" name="{{record_button_name}}" value="{{record_button_value}}">  
+            <input type="submit" name="{{submit_button_name}}" value="{{record_button_value}}">  
         </div>
     </form>
 
@@ -23,18 +23,18 @@
     {% if play_recorded %}
         <form align="center" method="POST">
             <div style="text-align:center">  
-                <input type="submit" name="{{play_button_name}}" value="{{play_button_value}}">
+                <input type="submit" name="{{submit_button_name}}" value="{{play_button_value}}">
             </div>
         </form>
 
-        <p align="center">If satisfied with the recorded source audio, calibrate and proceed with either of the two functions for voice conversion - <i>"change_gender"</i> or <i>"change_pitch"</i>.</p>
+        <p align="center">When done with recording source audio, tune and proceed with either of the two functions for voice conversion - <i>"change_gender"</i> or <i>"change_pitch"</i>.</p>
 
-        <p align="center">Calibrate and proceed with <i>"change_pitch"</i> function</p>
+        <p align="center">Tune and proceed with <i>"change_pitch"</i> function</p>
         <p align="center"><a href=change_pitch ><button class=grey> change_pitch </button></a></p>
 
         <p align="center">OR</p>
 
-        <p align="center">Calibrate and proceed with <i>"change_gender"</i> function</p>
+        <p align="center">Tune and proceed with <i>"change_gender"</i> function</p>
         <p align="center"><a href=change_gender ><button class=grey> change_gender </button></a></p>
 
     {% endif %}

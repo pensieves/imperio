@@ -17,7 +17,7 @@ from std_msgs.msg import UInt8MultiArray
 from imperio.sonorus.audio import VADAudioInputStreamer
 from imperio.sonorus.audio.utils import audio_float2int, audio_int2float
 from imperio.sonorus.audio.praat import reduce_noise, change_gender, change_pitch
-from imperio.sonorus.speech.kaldi import PhonemeSegmenter
+from imperio.sonorus.speech.kaldi import PhonemeSegmenter, VoskPhonemeSegmenter
 
 from imperio.robot.hr.lip_control import PhonemesPublisher
 from imperio.robot.hr.lip_control.utils import drop_random
@@ -59,8 +59,8 @@ def publish_proba_dropped_random_phonemes(
         publisher.publish(phonemes)
 
 
-def init_ros_node(name):
-    rospy.init_node(name)
+def init_ros_node(name, anonymous=True, disable_signals=False):
+    rospy.init_node(name, anonymous=anonymous, disable_signals=disable_signals)
 
 
 def producer_func(msg, segmenter):
@@ -148,6 +148,7 @@ def stream_speech(
     duration_factor=1,
     pitch_factor=1.5,
     time_step=0.01,
+    disable_ros_signals=False,
 ):
 
     voice_conv_kwargs = dict()
@@ -210,6 +211,10 @@ def stream_speech(
             phonemes_segmenter = PhonemeSegmenter.from_url()  # with default params
             segmenter = phonemes_segmenter.segment
 
+        elif phonemes_segmenter == "vosk":
+            phonemes_segmenter = VoskPhonemeSegmenter.from_url()  # with default params
+            segmenter = phonemes_segmenter.segment
+
         else:
             segmenter = random_segmenter
 
@@ -220,7 +225,7 @@ def stream_speech(
         audio_processor=audio_processor, phonemes_processor=phonemes_processor
     )
 
-    init_ros_node(name="streaming_speech")
+    init_ros_node(name="streaming_speech", disable_signals=disable_ros_signals)
     # r = rospy.Rate(10) # 10hz
 
     # import wave
@@ -280,7 +285,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p",
         "--phonemes_segmenter",
-        choices=("random", "kaldi"),
+        choices=("random", "kaldi", "vosk"),
         help="Phoneme segmenter to be used. By default, no phonemes will be published.",
     )
 
