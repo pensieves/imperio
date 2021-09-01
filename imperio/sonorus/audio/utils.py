@@ -103,6 +103,18 @@ def convert_to_wav(audio_in_path, out_sr=16000, audio_out_path=None):
     )
 
 
+def pad_sil_frames(frames, dtype=np.float32, target_nframes=float("inf")):
+    if np.isfinite(target_nframes) and frames:
+        sil_bytes = np.array([0], dtype=dtype).tobytes()
+        repeat_nbytes = len(frames[-1]) // len(sil_bytes)
+
+        sil_frame = b"".join((sil_bytes for i in range(repeat_nbytes)))
+        pad_frames = [sil_frame for i in range(target_nframes - len(frames))]
+
+        frames.extend(pad_frames)
+    return frames
+
+
 def vad_collector(
     streamer,
     vad=webrtcvad.Vad(3),
@@ -111,6 +123,7 @@ def vad_collector(
     act_inact_ratio=0.95,
     accumulate=True,
     accumulate_count=float("inf"),
+    pad_dtype=np.float32,
     frame_dtype_conv_fn=lambda frame, float_type, int_type: frame,
 ):
     r"""VAD based generator that yields voiced audio frames followed by a None 
@@ -166,6 +179,10 @@ def vad_collector(
                 triggered = False
 
                 if accumulate:
+                    voiced_frames = pad_sil_frames(
+                        voiced_frames, dtype=pad_dtype, target_nframes=accumulate_count
+                    )
+
                     # yield entire voiced frames
                     yield b"".join(voiced_frames)
 

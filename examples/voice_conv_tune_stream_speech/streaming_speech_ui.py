@@ -202,13 +202,13 @@ def change_audio_pitch():
     change_func = "change_pitch"
     params = [
         dict(
-            name="pitch_factor", default_value=1.5, value=1.5, min=0, max=3, step=0.05
+            name="pitch_factor", default_value=1.5, value=1.5, min=0, max=3, step=0.01,
         ),
         dict(
             name="time_step", default_value=0.01, value=0.01, min=0, max=0.1, step=0.005
         ),
-        dict(name="min_pitch", default_value=75, value=75, min=50, max=100, step=5),
-        dict(name="max_pitch", default_value=600, value=600, min=500, max=800, step=5),
+        dict(name="min_pitch", default_value=75, value=75, min=50, max=100, step=1),
+        dict(name="max_pitch", default_value=600, value=600, min=500, max=800, step=1),
     ]
 
     return change_audio(change_func, params, request)
@@ -219,21 +219,21 @@ def change_audio_gender():
 
     change_func = "change_gender"
     params = [
-        dict(name="min_pitch", default_value=75, value=75, min=50, max=100, step=5),
-        dict(name="max_pitch", default_value=600, value=600, min=500, max=800, step=5),
+        dict(name="min_pitch", default_value=75, value=75, min=50, max=100, step=1),
+        dict(name="max_pitch", default_value=600, value=600, min=500, max=800, step=1),
         dict(
             name="formant_shift_ratio",
             default_value=1.2,
             value=1.2,
             min=0.5,
             max=2,
-            step=0.05,
+            step=0.01,
         ),
-        dict(name="new_pitch_median", default_value=0, value=0, min=0, max=100, step=5),
+        dict(name="new_pitch_median", default_value=0, value=0, min=0, max=100, step=1),
         dict(
-            name="pitch_range_factor", default_value=1, value=1, min=0, max=2, step=0.5
+            name="pitch_range_factor", default_value=1, value=1, min=0, max=2, step=0.1
         ),
-        dict(name="duration_factor", default_value=1, value=1, min=0, max=3, step=0.5),
+        dict(name="duration_factor", default_value=1, value=1, min=0, max=3, step=0.1),
     ]
 
     return change_audio(change_func, params, request)
