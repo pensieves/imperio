@@ -56,6 +56,8 @@ class VADAudioInputStreamer(AudioInputStreamer):
         frame_dur_ms = (self.processing_block_size * 1000) // self.processing_rate
         self.num_padding_frames = padding_dur_ms // frame_dur_ms
 
+        self.pad_dtype = self.FMT2TYPE[self.pa_format]
+
         self._dtype_conv_fn = (
             audio_float2int
             if self.pa_format == pyaudio.paFloat32
@@ -72,5 +74,6 @@ class VADAudioInputStreamer(AudioInputStreamer):
             act_inact_ratio=self.act_inact_ratio,
             accumulate=self.accumulate,
             accumulate_count=self.accumulate_count,
+            pad_dtype=self.pad_dtype,
             frame_dtype_conv_fn=self._dtype_conv_fn,
         )
