@@ -1,1 +1,2 @@
 from .PhonemeSegmenter import PhonemeSegmenter
+from .VoskPhonemeSegmenter import VoskPhonemeSegmenter

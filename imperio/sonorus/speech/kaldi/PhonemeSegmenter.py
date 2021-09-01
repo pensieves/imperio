@@ -157,7 +157,7 @@ class PhonemeSegmenter(object):
             decodable_opts=decodable_opts,
         )
 
-    def segment(self, audio, sample_rate=22050, time_level=True, clean_up=True):
+    def segment(self, audio, sample_rate=16000, time_level=True, clean_up=True):
 
         temp_dir = create_random_dir(
             work_dir=self.work_dir, prefix="sonorus_phoneme_segmenter"

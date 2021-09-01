@@ -9,6 +9,9 @@ from ...utilities.utils import download, unpack_archive
 LIBRISPEECH_TGSMALL_URL = (
     "https://www.dropbox.com/s/eecyok5h1pfn7vy/librispeech_tgsmall.tar.gz?dl=1"
 )
+VOSK_MODEL_GENERIC_EN_US = (
+    "https://www.dropbox.com/s/xyu3fzwbefcrm71/vosk_model_generic_en_us.tar.gz?dl=1"
+)
 
 MODEL_ITEM_FILENAMES = dict(
     model_rxfilename="final.mdl",
@@ -22,11 +25,14 @@ MODEL_ITEM_FILENAMES = dict(
 
 
 def download_model(
-    url=LIBRISPEECH_TGSMALL_URL, cache_dir=CACHE_DIR, force_download=False,
+    url=LIBRISPEECH_TGSMALL_URL,
+    cache_dir=CACHE_DIR,
+    force_download=False,
+    prefix="kaldi_model",
 ):
 
     url_hash = hashlib.md5(url.encode()).hexdigest()
-    download_dir = Path(cache_dir) / f"kaldi_model_{url_hash}"
+    download_dir = Path(cache_dir) / f"{prefix}_{url_hash}"
     model_dir = check_and_download(url, download_dir, force_download=force_download)
 
     return model_dir
