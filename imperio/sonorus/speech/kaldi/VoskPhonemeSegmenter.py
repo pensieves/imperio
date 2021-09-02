@@ -112,6 +112,7 @@ class VoskPhonemeSegmenter(PhonemeSegmenter):
 
         phonemes = {"utt1": {"phonemes": []}}
 
+        text = ""
         for i in range(0, len(audio), self.chunk):
             recognized = recognizer.AcceptWaveform(audio[i : i + self.chunk])
 
@@ -120,19 +121,18 @@ class VoskPhonemeSegmenter(PhonemeSegmenter):
             #     print(i, recognized, decoded)
 
             if recognized:
-
                 decoded = json.loads(recognizer.Result())
-                if decoded["text"]:
-                    # import pdb; pdb.set_trace()
-                    phones = to_phonemes(decoded["text"], self.lexicon)
+                text += " " + decoded["text"]
 
-                    phoneme_dur = round(audio_dur / len(phones), 3)
-                    phones = [
-                        (ph, i * phoneme_dur, phoneme_dur)
-                        for i, ph in enumerate(phones)
-                    ]
+        if text:
+            # import pdb; pdb.set_trace()
+            text = text.strip()
+            phones = to_phonemes(text, self.lexicon)
 
-                    phones = self.repack(self.simplify(phones))
-                    phonemes["utt1"] = dict(text=decoded["text"], phonemes=phones)
+            phoneme_dur = round(audio_dur / len(phones), 3)
+            phones = [(ph, i * phoneme_dur, phoneme_dur) for i, ph in enumerate(phones)]
+
+            phones = self.repack(self.simplify(phones))
+            phonemes["utt1"] = dict(text=text, phonemes=phones)
 
         return phonemes
