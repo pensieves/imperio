@@ -151,7 +151,8 @@ def vad_collector(
                     voiced_frames.extend((f for f, s in ring_buff))
 
                     while len(voiced_frames) >= accumulate_count:
-                        yield b"".join(voiced_frames[:accumulate_count])
+                        voiced = b"".join(voiced_frames[:accumulate_count])
+                        yield voiced
                         voiced_frames = voiced_frames[accumulate_count:]
 
                 else:
@@ -166,7 +167,8 @@ def vad_collector(
                 voiced_frames.append(frame)
 
                 while len(voiced_frames) >= accumulate_count:
-                    yield b"".join(voiced_frames[:accumulate_count])
+                    voiced = b"".join(voiced_frames[:accumulate_count])
+                    yield voiced
                     voiced_frames = voiced_frames[accumulate_count:]
 
             else:
@@ -184,7 +186,8 @@ def vad_collector(
                     )
 
                     # yield entire voiced frames
-                    yield b"".join(voiced_frames)
+                    voiced = b"".join(voiced_frames)
+                    yield voiced
 
                 # yield None to mark a break in consecutive but separate voiced
                 # frames so that speech processor can start transcribing the
