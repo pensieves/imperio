@@ -38,16 +38,21 @@ class PhonemesPublisher(VisemesPublisher):
 
     def random(self, duration, chunk=0.12, seed=None):
         random_gen = random.Random(seed)
-        phonemes = list(self.phoneme2viseme.keys())
+        phones = list(self.phoneme2viseme.keys())
 
-        phonemes = [
-            {
-                self.phoneme_key: random_gen.choice(phonemes),
+        phonemes = list()
+
+        for i, j in enumerate(np.arange(0, duration, chunk)):
+
+            ph = random_gen.choice(phones)
+            phone = {
+                self.phoneme_key: ph,
                 "start": j,
                 "duration": round(min(chunk, duration - i * chunk), 3),
             }
-            for i, j in enumerate(np.arange(0, duration, chunk))
-        ]
+
+            phone.update(deepcopy(self.viseme_params.get(ph, self.default_params)))
+            phonemes.append(phone)
 
         if len(phonemes) > 1:
             # make the last phoneme always a silence phoneme
