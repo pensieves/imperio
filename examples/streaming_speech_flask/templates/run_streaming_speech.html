@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Streaming Speech</title>
+  </head>
+
+  <body>
+    <h1 align="center"> Streaming Speech Server </h1>
+
+      <div>
+        
+        {% if params %}
+          <p>Saved parameters for voice conversion detected. Check the box for "{{voice_conv_checkbox}}" if you want to proceed with the loaded parameters:</p>
+
+          {% for param in params %}
+            {% if loop.index != 1 %}
+              <br></br>
+            {% endif %}
+            <span>{{param.name}} : {{param.value}}</span>
+          {% endfor %}
+
+          <p align="center">OR</p>
+        {% endif %}
+        
+        <p>Click on the "{{tune_button_name}}" button to tune, save and use the voice conversion parameters.</p>
+        
+        <p align="center"><a href=record_audio ><button class=grey> {{tune_button_name}} </button></a></p>
+
+        <p align="center">OR</p>
+        <p>Proceed to set / select other parameters and stream the speech:</p>
+      </div>
+
+      <div style="text-align:center">  
+        <form method="POST">
+          
+          {% if params %}
+            <p align="left"><input type="checkbox" name="{{voice_conv_checkbox}}" value="{{voice_conv_checkbox}}" checked> {{voice_conv_checkbox}}</p>
+          {% endif %}
+          
+          <p align="left">{{vad_accumulate_count_name}} : <input type="text" size="4" value="{{vad_accumulate_count_default}}" name="{{vad_accumulate_count_name}}"/></p>
+
+          <p align="left">One frame length is ~20 milliseconds. Please specify a frame count of -1 or >= 20. A frame count of -1 will process and relay the speech only when a pause is detected in operator's voice. Frame accumulation count is required only during voice conversion, hence is ignored if voice conversion is not specified.</p>
+          
+          <input align="center" type="submit" name="{{submit_button_name}}" value="{{run_button_name}}">  
+        </form>
+      </div>
+  </body>
+
+</html>
