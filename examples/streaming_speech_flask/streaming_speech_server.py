@@ -49,6 +49,10 @@ CHANGED_AUDIO = b""
 
 CHANGE_PARAMS_YAML = "change_params.yaml"
 
+VOICE_CONV_CHECKBOX = "Use Voice Conversion"
+VAD_ACCUMULATE_COUNT_NAME = "Voice Frame accumulation count"
+VAD_ACCUMULATE_COUNT_DEFAULT = "20"
+PHONEME_SEGMENTER = "random"
 
 def record_audio(audio_dur=5):
 
@@ -243,15 +247,35 @@ def change_audio_gender():
 def run_streaming_speech():
 
     template_html = "run_streaming_speech.html"
+    change_params = from_yaml(Path(DATA_DIR) / CHANGE_PARAMS_YAML)
+
+    params = list()
+    if change_params.get("voice_conv_fn"):
+        params = [{"name": "voice_conv_fn", "value": change_params["voice_conv_fn"]}]
+        params += [{"name":k, "value": v} for k,v in change_params.items() if k != "voice_conv_fn"]
 
     if request.method == "POST":
         if request.form[SUBMIT_BUTTON_NAME] == RUN_BUTTON_NAME:
-            change_params = from_yaml(Path(DATA_DIR) / CHANGE_PARAMS_YAML)
-            print(f"change_params = {change_params}")
-            stream_speech(disable_ros_signals=True, **change_params)
+
+            run_kwargs = dict(phonemes_segmenter="random")
+            
+            if request.form.get(VOICE_CONV_CHECKBOX):
+                run_kwargs.update(change_params)
+
+            run_kwargs["vad_accumulate_count"] = int(
+                request.form.get(VAD_ACCUMULATE_COUNT_NAME)
+            )
+            print(run_kwargs)
+
+            stream_speech(disable_ros_signals=True, **run_kwargs)
 
     template = render_template(
         template_html,
+        params=params,
+        tune_button_name=TUNE_BUTTON_NAME,
+        voice_conv_checkbox=VOICE_CONV_CHECKBOX,
+        vad_accumulate_count_name=VAD_ACCUMULATE_COUNT_NAME,
+        vad_accumulate_count_default=VAD_ACCUMULATE_COUNT_DEFAULT,
         submit_button_name=SUBMIT_BUTTON_NAME,
         run_button_name=RUN_BUTTON_NAME,
     )

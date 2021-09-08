@@ -9,7 +9,6 @@ import numpy as np
 import parselmouth
 import pyaudio
 import librosa
-from copy import deepcopy
 from functools import partial
 
 import rospy
@@ -51,34 +50,13 @@ def publish_audio_stream(audio_stream, publisher):
 
 
 def publish_proba_dropped_random_phonemes(
-    phoneme_stream,
-    publisher,
-    duration=0.02,
-    seed=None,
-    drop_th=0.8,
-    sil="Sil",
-    end_sil=True,
+    phoneme_stream, publisher, duration=0.02, seed=None, drop_th=0.8,
 ):
 
     for ph in phoneme_stream:
         phonemes = publisher.random(duration, chunk=duration)
         phonemes = drop_random(phonemes, seed=seed, drop_th=drop_th)
-
-        if phonemes:
-            if end_sil and phonemes[-1][phoneme_key] != sil:
-
-                phone = {
-                    phoneme_key: sil,
-                    "start": round(phonemes[-1]["start"] + phonemes[-1]["duration"], 3),
-                    "duration": round(phonemes[-1]["duration"] / 2, 3),
-                    "magnitude": phonemes[-1]["magnitude"],
-                    "rampin": round(phonemes[-1]["rampin"] / 2, 3),
-                    "rampout": round(phonemes[-1]["rampout"] / 2, 3),
-                }
-
-                phonemes.append(phone)
-
-            publisher.publish(phonemes)
+        publisher.publish(phonemes)
 
 
 def init_ros_node(name, anonymous=True, disable_signals=False):
@@ -159,7 +137,7 @@ def stream_speech(
     visemes_topic="/hr/animation/queue_visemes",
     pub_queue_size=2500,
     phonemes_segmenter=None,
-    vad_accumulate_count=10,
+    vad_accumulate_count=20,
     voice_conv_fn=None,
     min_pitch=75,
     max_pitch=600,
@@ -221,15 +199,6 @@ def stream_speech(
 
     else:
 
-        # -1 represents infinity
-        if vad_accumulate_count != -1:
-            audio_streamer_kwargs["accumulate_count"] = vad_accumulate_count
-
-        phonemes_processor = SingleProcessor(
-            target_func=phonemes_pub.publish,
-            starter_func=partial(init_ros_node, name="Phonemes"),
-        )
-
         if phonemes_segmenter == "random":
             segmenter = partial(random_segmenter, base_segmenter=phonemes_pub.random)
 
@@ -244,6 +213,24 @@ def stream_speech(
         else:
             segmenter = random_segmenter
 
+        phonemes_target_func = phonemes_pub.publish
+
+        # -1 represents infinity
+        if vad_accumulate_count != -1:
+
+            audio_streamer_kwargs["accumulate_count"] = vad_accumulate_count
+
+            phonemes_target_func=partial(
+                publish_proba_dropped_random_phonemes, publisher=phonemes_pub,
+            )
+
+            segmenter = partial(random_segmenter, chunk=CHUNK)
+
+        phonemes_processor = SingleProcessor(
+            target_func=phonemes_target_func,
+            starter_func=partial(init_ros_node, name="Phonemes"),
+        )        
+
     audio_streamer = VADAudioInputStreamer(**audio_streamer_kwargs)
 
     audio_phonemes_producer_kwargs = dict(segmenter=segmenter)
@@ -254,15 +241,13 @@ def stream_speech(
     init_ros_node(name="streaming_speech", disable_signals=disable_ros_signals)
     # r = rospy.Rate(10) # 10hz
 
-    # import soundfile as sf
-    # counter = 1
-
     while not rospy.is_shutdown():
-        # import pdb; pdb.set_trace()
+
         with audio_streamer as streamer:
+
             for stream in streamer.stream():
-                if stream is not None:
-                    # import pdb; pdb.set_trace()
+
+                if stream:
                     dtype = streamer.FMT2TYPE[streamer.pa_format]
 
                     try:
@@ -277,7 +262,6 @@ def stream_speech(
                         # print(e)
                         pass  # continue with the original stream and dtype
 
-                    # import pdb; pdb.set_trace()
                     producer_consumer(
                         msg=(stream, dtype, streamer.processing_rate),
                         producer_kwargs=audio_phonemes_producer_kwargs,
@@ -323,7 +307,7 @@ if __name__ == "__main__":
         "-g",
         "--vad_accumulate_count",
         type=int,
-        default=10,
+        default=20,
         help="Frame accumulation count for VAD to facilitate further audio processing"
         " e.g. change_pitch or change_pitch. Default count is 10. Specify -1 for infinity.",
     )
