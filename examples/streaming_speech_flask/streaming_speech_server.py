@@ -54,7 +54,7 @@ VAD_ACCUMULATE_COUNT_NAME = "Voice Frame accumulation count"
 VAD_ACCUMULATE_COUNT_DEFAULT = "20"
 PHONEME_SEGMENTER = "random"
 
-def record_audio(audio_dur=5):
+def record_audio(audio_dur=10):
 
     audio = b""
     audio_streamer = AudioInputStreamer(sample_rate=SAMPLE_RATE, pa_format=PA_FORMAT)
@@ -190,6 +190,7 @@ def change_audio(change_func, params, request):
 
     template = render_template(
         template_html,
+        change_func=change_func,
         params=params,
         submit_button_name=SUBMIT_BUTTON_NAME,
         play_source_button_value=PLAY_SOURCE_BUTTON_VALUE,
@@ -250,6 +251,16 @@ def run_streaming_speech():
     change_params = from_yaml(Path(DATA_DIR) / CHANGE_PARAMS_YAML)
 
     params = list()
+
+    phonemes_params = [
+        dict(
+            name="phonemes_duration", default_value=0.04, value=0.04, min=0.02, max=0.2, step=0.01,
+        ),
+        dict(
+            name="phonemes_drop_th", default_value=0.85, value=0.85, min=0, max=1, step=0.01
+        ),
+    ]
+
     if change_params.get("voice_conv_fn"):
         params = [{"name": "voice_conv_fn", "value": change_params["voice_conv_fn"]}]
         params += [{"name":k, "value": v} for k,v in change_params.items() if k != "voice_conv_fn"]
@@ -261,6 +272,9 @@ def run_streaming_speech():
             
             if request.form.get(VOICE_CONV_CHECKBOX):
                 run_kwargs.update(change_params)
+
+            phonemes_params = update_params(phonemes_params, request.form)
+            run_kwargs.update({p["name"]: p["value"] for p in phonemes_params})
 
             run_kwargs["vad_accumulate_count"] = int(
                 request.form.get(VAD_ACCUMULATE_COUNT_NAME)
@@ -274,6 +288,7 @@ def run_streaming_speech():
         params=params,
         tune_button_name=TUNE_BUTTON_NAME,
         voice_conv_checkbox=VOICE_CONV_CHECKBOX,
+        phonemes_params=phonemes_params,
         vad_accumulate_count_name=VAD_ACCUMULATE_COUNT_NAME,
         vad_accumulate_count_default=VAD_ACCUMULATE_COUNT_DEFAULT,
         submit_button_name=SUBMIT_BUTTON_NAME,
