@@ -38,6 +38,15 @@
           {% if params %}
             <p align="left"><input type="checkbox" name="{{voice_conv_checkbox}}" value="{{voice_conv_checkbox}}" checked> {{voice_conv_checkbox}}</p>
           {% endif %}
+
+          {% for param in phonemes_params %}
+              <span>{{param.name}}</span>
+              <input align="left" type="range" name="{{param.name}}" min="{{param.min}}" max="{{param.max}}" step="{{param.step}}" value="{{param.value}}" oninput="updateTextInput(this.value,'{{param.name}}')";>
+              <label id="{{param.name}}">{{param.value}}</label>
+              <script type="text/javascript" src="static/calib.js"></script>
+              <br></br>
+              <br></br>
+          {% endfor %}
           
           <p align="left">{{vad_accumulate_count_name}} : <input type="text" size="4" value="{{vad_accumulate_count_default}}" name="{{vad_accumulate_count_name}}"/></p>
 

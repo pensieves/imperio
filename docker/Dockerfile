@@ -37,9 +37,7 @@ RUN apt-get update -y && \
         rm -rf /home/${HR_MSGS} && \
     rm -rf /var/lib/apt/lists/*
 
-COPY . /home/imperio
-
-WORKDIR /home/imperio
+COPY ./requirements.txt /home/requirements.txt
 
 ARG URL=https://www.dropbox.com/s/eecyok5h1pfn7vy/librispeech_tgsmall.tar.gz?dl=1
 
@@ -55,5 +53,8 @@ RUN export MODEL=$(export TEMP="${URL##*/}"; echo "${TEMP%%.*}") && \
         wget -O ${MODEL}.tar.gz ${URL} && \
         tar -xzvf ${MODEL}.tar.gz && \
         rm ${MODEL}.tar.gz && \
-    cd /home/imperio && \
-    pip install -r requirements.txt 
+    cd /home && \
+    pip install -r requirements.txt && \
+    rm requirements.txt
+
+WORKDIR /home/imperio

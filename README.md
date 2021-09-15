@@ -65,18 +65,38 @@ If required, update the ROS_IP and ROS_MASTER_URI environment variables in the `
 
 `docker/docker_run.sh <container_name>`
 
-The container_name could be specified based on the task e.g. it can be named `imperio_speech` or `imperio_audio` for `streaming_speech` or `audio` tasks respectively. Then follow the running instructions for the required tasks e.g.:
+The container_name could be specified based on the task e.g. it can be named `imperio_speech` or `imperio_audio` for `streaming_speech` or `audio` tasks respectively. 
+
+Then follow the running instructions for the required tasks e.g. to run streaming_speech with flask server and tuning, execute:
+
+```
+docker/docker_run.sh imperio_speech
+python3 python3 examples/streaming_speech_flask/streaming_speech_server.py
+```
+
+To run streaming_speech without flask server, ui and tuning execute:
 
 ```
 docker/docker_run.sh imperio_speech
 python3 examples/streaming_speech.py --voice_conv_fn change_pitch --multiplier 1.5
 ```
 
-or
+To receive audio from the avatar to operator, execute:
 
 ```
 docker/docker_run.sh imperio_audio
 python3 examples/audio.py
+```
+
+Alternately, execute the tmuxinator (install using `sudo apt install tmuxinator`) to run with default configs for speech and audio by executing:
+
+```
+tmuxinator start audio
+```
+
+To stop tmuxinator use:
+```
+tmuxinator stop audio
 ```
 
 ### Running instructions:

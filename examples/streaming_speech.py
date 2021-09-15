@@ -8,6 +8,7 @@ import argparse
 import numpy as np
 import parselmouth
 import pyaudio
+import random
 import librosa
 from functools import partial
 
@@ -30,6 +31,18 @@ from datetime import datetime
 
 CHUNK = 320
 
+PHONEME_GROUPS = dict(
+    large=(["AA", "AI", "AU", "AE", "AH", "AW", "AX", "AY", "EY"] + # A-I viseme
+        ["IY", "EH"]), # E viseme
+    mid=(["CH", "D", "DH", "G", "H", "HH", "JH", "K", "N", "NG", "S", "SH", "T", "TH", "Z", "ZH", "DX", "ER"] + # C-D-G-K-N-S-TH viseme
+        ["IH", "L", "Y", "R"] + # L viseme
+        ["AO", "OW", "OY"] + # O viseme
+        ["W"] + # Q-W viseme
+        ["UH", "UW"]), # U viseme
+    small=(["F", "V"] + # F-V viseme
+        ["B", "M", "P"]), # M viseme
+)
+
 
 def random_segmenter(audio, sample_rate, base_segmenter=None, chunk=None):
     phonemes = {"utt1": {"phonemes": []}}
@@ -50,11 +63,16 @@ def publish_audio_stream(audio_stream, publisher):
 
 
 def publish_proba_dropped_random_phonemes(
-    phoneme_stream, publisher, duration=0.02, seed=None, drop_th=0.8,
+    phoneme_stream, publisher, duration=0.04, seed=None, drop_th=0.85,
 ):
 
+    random_gen = random.Random(seed)
     for ph in phoneme_stream:
         phonemes = publisher.random(duration, chunk=duration)
+
+        # replace with large movement phonemes
+        phonemes[0][publisher.phoneme_key] = random_gen.choice(PHONEME_GROUPS["large"])
+        
         phonemes = drop_random(phonemes, seed=seed, drop_th=drop_th)
         publisher.publish(phonemes)
 
@@ -137,6 +155,8 @@ def stream_speech(
     visemes_topic="/hr/animation/queue_visemes",
     pub_queue_size=2500,
     phonemes_segmenter=None,
+    phonemes_duration=0.04,
+    phonemes_drop_th=0.85,
     vad_accumulate_count=20,
     voice_conv_fn=None,
     min_pitch=75,
@@ -190,7 +210,10 @@ def stream_speech(
 
         phonemes_processor = SingleProcessor(
             target_func=partial(
-                publish_proba_dropped_random_phonemes, publisher=phonemes_pub,
+                publish_proba_dropped_random_phonemes, 
+                publisher=phonemes_pub,
+                duration=phonemes_duration,
+                drop_th=phonemes_drop_th,
             ),
             starter_func=partial(init_ros_node, name="Phonemes"),
         )
@@ -221,7 +244,10 @@ def stream_speech(
             audio_streamer_kwargs["accumulate_count"] = vad_accumulate_count
 
             phonemes_target_func=partial(
-                publish_proba_dropped_random_phonemes, publisher=phonemes_pub,
+                publish_proba_dropped_random_phonemes, 
+                publisher=phonemes_pub,
+                duration=phonemes_duration,
+                drop_th=phonemes_drop_th,
             )
 
             segmenter = partial(random_segmenter, chunk=CHUNK)
@@ -269,6 +295,10 @@ def stream_speech(
                     )
                     # r.sleep()
 
+                # else:
+                #     phonemes = phonemes_pub.random(phonemes_duration, chunk=phonemes_duration)
+                #     phonemes[0][phonemes_pub.phoneme_key] = phonemes_pub.sil
+                #     phonemes_pub.publish(phonemes)
 
 if __name__ == "__main__":
 
@@ -301,6 +331,22 @@ if __name__ == "__main__":
         "--phonemes_segmenter",
         choices=("random", "kaldi", "vosk"),
         help="Phoneme segmenter to be used. By default, no phonemes will be published.",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--phonemes_duration",
+        type=float,
+        default=0.04,
+        help="Phonemes duration for random phonemes. By default, 0.04 secs.",
+    )
+
+    parser.add_argument(
+        "-t",
+        "--phonemes_drop_th",
+        type=float,
+        default=0.85,
+        help="Phonemes drop threshold for random phonemes. By default, 0.85 i.e. 85%.",
     )
 
     parser.add_argument(
@@ -385,6 +431,8 @@ if __name__ == "__main__":
         visemes_topic=args.visemes_topic,
         pub_queue_size=args.pub_queue_size,
         phonemes_segmenter=args.phonemes_segmenter,
+        phonemes_duration=args.phonemes_duration,
+        phonemes_drop_th=args.phonemes_drop_th,
         vad_accumulate_count=args.vad_accumulate_count,
         voice_conv_fn=args.voice_conv_fn,
         min_pitch=args.min_pitch,
