@@ -10,6 +10,7 @@ import parselmouth
 import pyaudio
 import random
 import librosa
+from pydub import AudioSegment
 from functools import partial
 
 import rospy
