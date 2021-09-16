@@ -8,11 +8,9 @@ windows:
       panes:
         - Audio Send:
            - docker/docker_run.sh imperio_speech
-           - cd /home/imperio
            - python3 examples/streaming_speech_flask/streaming_speech_server.py
 
         - Audio Receive:
            - docker/docker_run.sh imperio_audio
-           - cd /home/imperio
            - python3 examples/audio.py
 

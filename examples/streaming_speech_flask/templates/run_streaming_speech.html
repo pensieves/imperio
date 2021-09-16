@@ -48,6 +48,8 @@
               <br></br>
           {% endfor %}
           
+          <p align="left">{{decibel_shift_name}} : <input type="text" size="4" value="{{decibel_shift_default}}" name="{{decibel_shift_name}}"/></p>
+
           <p align="left">{{vad_accumulate_count_name}} : <input type="text" size="4" value="{{vad_accumulate_count_default}}" name="{{vad_accumulate_count_name}}"/></p>
 
           <p align="left">One frame length is ~20 milliseconds. Please specify a frame count of -1 or >= 20. A frame count of -1 will process and relay the speech only when a pause is detected in operator's voice. Frame accumulation count is required only during voice conversion, hence is ignored if voice conversion is not specified.</p>
