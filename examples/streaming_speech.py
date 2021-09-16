@@ -32,15 +32,38 @@ from datetime import datetime
 CHUNK = 320
 
 PHONEME_GROUPS = dict(
-    large=(["AA", "AI", "AU", "AE", "AH", "AW", "AX", "AY", "EY"] + # A-I viseme
-        ["IY", "EH"]), # E viseme
-    mid=(["CH", "D", "DH", "G", "H", "HH", "JH", "K", "N", "NG", "S", "SH", "T", "TH", "Z", "ZH", "DX", "ER"] + # C-D-G-K-N-S-TH viseme
-        ["IH", "L", "Y", "R"] + # L viseme
-        ["AO", "OW", "OY"] + # O viseme
-        ["W"] + # Q-W viseme
-        ["UH", "UW"]), # U viseme
-    small=(["F", "V"] + # F-V viseme
-        ["B", "M", "P"]), # M viseme
+    large=(
+        ["AA", "AI", "AU", "AE", "AH", "AW", "AX", "AY", "EY"] # A-I viseme
+        + ["IY", "EH"]  # E viseme
+    ),  
+    mid=(
+        [
+            "CH",
+            "D",
+            "DH",
+            "G",
+            "H",
+            "HH",
+            "JH",
+            "K",
+            "N",
+            "NG",
+            "S",
+            "SH",
+            "T",
+            "TH",
+            "Z",
+            "ZH",
+            "DX",
+            "ER",
+        ] # C-D-G-K-N-S-TH viseme
+        + ["IH", "L", "Y", "R"]  # L viseme
+        + ["AO", "OW", "OY"]  # O viseme
+        + ["W"]  # Q-W viseme
+        + ["UH", "UW"]  # U viseme
+    ),  
+    small=(["F", "V"] + ["B", "M", "P"]),  # F-V viseme and M viseme
+    sil=["Sil"],  # Sil viseme
 )
 
 
@@ -71,8 +94,10 @@ def publish_proba_dropped_random_phonemes(
         phonemes = publisher.random(duration, chunk=duration)
 
         # replace with large movement phonemes
-        phonemes[0][publisher.phoneme_key] = random_gen.choice(PHONEME_GROUPS["large"])
-        
+        phonemes[0][publisher.phoneme_key] = random_gen.choice(
+            PHONEME_GROUPS["large"] + PHONEME_GROUPS["sil"]
+        )
+
         phonemes = drop_random(phonemes, seed=seed, drop_th=drop_th)
         publisher.publish(phonemes)
 
@@ -158,6 +183,7 @@ def stream_speech(
     phonemes_duration=0.04,
     phonemes_drop_th=0.85,
     vad_accumulate_count=20,
+    decibel_shift=0,
     voice_conv_fn=None,
     min_pitch=75,
     max_pitch=600,
@@ -210,7 +236,7 @@ def stream_speech(
 
         phonemes_processor = SingleProcessor(
             target_func=partial(
-                publish_proba_dropped_random_phonemes, 
+                publish_proba_dropped_random_phonemes,
                 publisher=phonemes_pub,
                 duration=phonemes_duration,
                 drop_th=phonemes_drop_th,
@@ -243,8 +269,8 @@ def stream_speech(
 
             audio_streamer_kwargs["accumulate_count"] = vad_accumulate_count
 
-            phonemes_target_func=partial(
-                publish_proba_dropped_random_phonemes, 
+            phonemes_target_func = partial(
+                publish_proba_dropped_random_phonemes,
                 publisher=phonemes_pub,
                 duration=phonemes_duration,
                 drop_th=phonemes_drop_th,
@@ -255,7 +281,7 @@ def stream_speech(
         phonemes_processor = SingleProcessor(
             target_func=phonemes_target_func,
             starter_func=partial(init_ros_node, name="Phonemes"),
-        )        
+        )
 
     audio_streamer = VADAudioInputStreamer(**audio_streamer_kwargs)
 
@@ -274,6 +300,19 @@ def stream_speech(
             for stream in streamer.stream():
 
                 if stream:
+
+                    if decibel_shift:
+
+                        stream = AudioSegment(
+                            stream,
+                            sample_width=2,  # 16 bit
+                            frame_rate=streamer.processing_rate,
+                            channels=streamer.channels,
+                        )
+
+                        stream += decibel_shift
+                        stream = stream.raw_data
+
                     dtype = streamer.FMT2TYPE[streamer.pa_format]
 
                     try:
@@ -299,6 +338,7 @@ def stream_speech(
                 #     phonemes = phonemes_pub.random(phonemes_duration, chunk=phonemes_duration)
                 #     phonemes[0][phonemes_pub.phoneme_key] = phonemes_pub.sil
                 #     phonemes_pub.publish(phonemes)
+
 
 if __name__ == "__main__":
 
@@ -356,6 +396,13 @@ if __name__ == "__main__":
         default=20,
         help="Frame accumulation count for VAD to facilitate further audio processing"
         " e.g. change_pitch or change_pitch. Default count is 10. Specify -1 for infinity.",
+    )
+
+    parser.add_argument(
+        "--decibel_shift",
+        type=int,
+        default=0,
+        help="Shift in audio decibel to be applied. Default is 0 dB.",
     )
 
     parser.add_argument(

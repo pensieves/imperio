@@ -50,9 +50,15 @@ CHANGED_AUDIO = b""
 CHANGE_PARAMS_YAML = "change_params.yaml"
 
 VOICE_CONV_CHECKBOX = "Use Voice Conversion"
+
+DECIBEL_SHIFT_NAME = "Decibel shift"
+DECIBEL_SHIFT_DEFAULT = "12"
+
 VAD_ACCUMULATE_COUNT_NAME = "Voice Frame accumulation count"
 VAD_ACCUMULATE_COUNT_DEFAULT = "20"
+
 PHONEME_SEGMENTER = "random"
+
 
 def record_audio(audio_dur=10):
 
@@ -254,27 +260,43 @@ def run_streaming_speech():
 
     phonemes_params = [
         dict(
-            name="phonemes_duration", default_value=0.04, value=0.04, min=0.02, max=0.2, step=0.01,
+            name="phonemes_duration",
+            default_value=0.04,
+            value=0.04,
+            min=0.02,
+            max=0.2,
+            step=0.01,
         ),
         dict(
-            name="phonemes_drop_th", default_value=0.85, value=0.85, min=0, max=1, step=0.01
+            name="phonemes_drop_th",
+            default_value=0.85,
+            value=0.85,
+            min=0,
+            max=1,
+            step=0.01,
         ),
     ]
 
     if change_params.get("voice_conv_fn"):
         params = [{"name": "voice_conv_fn", "value": change_params["voice_conv_fn"]}]
-        params += [{"name":k, "value": v} for k,v in change_params.items() if k != "voice_conv_fn"]
+        params += [
+            {"name": k, "value": v}
+            for k, v in change_params.items()
+            if k != "voice_conv_fn"
+        ]
 
     if request.method == "POST":
         if request.form[SUBMIT_BUTTON_NAME] == RUN_BUTTON_NAME:
 
             run_kwargs = dict(phonemes_segmenter="random")
-            
+
             if request.form.get(VOICE_CONV_CHECKBOX):
                 run_kwargs.update(change_params)
 
             phonemes_params = update_params(phonemes_params, request.form)
             run_kwargs.update({p["name"]: p["value"] for p in phonemes_params})
+
+            run_kwargs["decibel_shift"] = int(request.form.get(DECIBEL_SHIFT_NAME))
 
             run_kwargs["vad_accumulate_count"] = int(
                 request.form.get(VAD_ACCUMULATE_COUNT_NAME)
@@ -289,6 +311,8 @@ def run_streaming_speech():
         tune_button_name=TUNE_BUTTON_NAME,
         voice_conv_checkbox=VOICE_CONV_CHECKBOX,
         phonemes_params=phonemes_params,
+        decibel_shift_name=DECIBEL_SHIFT_NAME,
+        decibel_shift_default=DECIBEL_SHIFT_DEFAULT,
         vad_accumulate_count_name=VAD_ACCUMULATE_COUNT_NAME,
         vad_accumulate_count_default=VAD_ACCUMULATE_COUNT_DEFAULT,
         submit_button_name=SUBMIT_BUTTON_NAME,
