@@ -9,16 +9,25 @@ from std_msgs.msg import UInt8MultiArray
 
 
 class AudioOutputStreamer(object):
-    def __init__(self, chunk_size=8000, sample_rate=16000):
+    def __init__(
+        self,
+        sample_rate=16000,
+        channels=1,
+        chunk_size=8000,
+        topic="/hr/sensors/audio/speech_recognizer",
+    ):
+        r"""specify /binaural_audio as topic for binaural audio"""
+
         self.chunk_size = chunk_size
         self.left_chunk = b""
         self.sample_rate = rospy.get_param("audio_rate", sample_rate)
 
         self.buffer = Queue()
         self.p = pyaudio.PyAudio()
+
         self.stream = self.p.open(
             format=self.p.get_format_from_width(2),
-            channels=1,
+            channels=channels,
             rate=self.sample_rate,
             output=True,
             start=False,
@@ -28,9 +37,7 @@ class AudioOutputStreamer(object):
         self.job.start()
 
         # audio_stream_topic = rospy.get_param('audio_stream_topic', 'speech_audio')
-        audio_stream_topic = rospy.get_param(
-            "audio_stream_topic", "/hr/sensors/audio/speech_recognizer"
-        )
+        audio_stream_topic = rospy.get_param("audio_stream_topic", topic)
         rospy.Subscriber(audio_stream_topic, UInt8MultiArray, self.append_data)
 
     def append_data(self, msg):
