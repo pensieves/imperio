@@ -34,9 +34,9 @@ CHUNK = 320
 
 PHONEME_GROUPS = dict(
     large=(
-        ["AA", "AI", "AU", "AE", "AH", "AW", "AX", "AY", "EY"] # A-I viseme
+        ["AA", "AI", "AU", "AE", "AH", "AW", "AX", "AY", "EY"]  # A-I viseme
         + ["IY", "EH"]  # E viseme
-    ),  
+    ),
     mid=(
         [
             "CH",
@@ -57,12 +57,12 @@ PHONEME_GROUPS = dict(
             "ZH",
             "DX",
             "ER",
-        ] # C-D-G-K-N-S-TH viseme
+        ]  # C-D-G-K-N-S-TH viseme
         + ["IH", "L", "Y", "R"]  # L viseme
         + ["AO", "OW", "OY"]  # O viseme
         + ["W"]  # Q-W viseme
         + ["UH", "UW"]  # U viseme
-    ),  
+    ),
     small=(["F", "V"] + ["B", "M", "P"]),  # F-V viseme and M viseme
     sil=["Sil"],  # Sil viseme
 )
